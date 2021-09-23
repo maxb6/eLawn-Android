@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "36589065286",
+    "project_id": "elawnandroid",
+    "storage_bucket": "elawnandroid.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:36589065286:android:eced17d879692e697b6647",
+        "android_client_info": {
+          "package_name": "com.example.elawn_android"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "36589065286-9g9kft6egaesd2thkvn6emjc51s4mtkf.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBcJnEhzruCUXGJiJZqSJBrKI2kUCEA92w"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "36589065286-9g9kft6egaesd2thkvn6emjc51s4mtkf.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
