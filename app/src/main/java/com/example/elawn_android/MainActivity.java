@@ -15,6 +15,7 @@ public class MainActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
     private Button loginPageButton;
     private Button signOutButton;
+    private Button mapsButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -23,6 +24,7 @@ public class MainActivity extends AppCompatActivity {
 
         loginPageButton = findViewById(R.id.loginPage);
         signOutButton = findViewById(R.id.signOutButton);
+        mapsButton = findViewById(R.id.mapsButton);
         mAuth = FirebaseAuth.getInstance();
 
         loginPageButton.setOnClickListener(new View.OnClickListener() {
@@ -37,6 +39,13 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 mAuth.signOut();
                 goToLoginActivity();
+            }
+        });
+
+        mapsButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                goToMapsActivity();
             }
         });
 
@@ -59,5 +68,10 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = new Intent (this,LoginActivity.class);
         startActivity(intent);
         finish();
+    }
+
+    private void goToMapsActivity(){
+        Intent intent = new Intent (this,MapsActivity.class);
+        startActivity(intent);
     }
 }
