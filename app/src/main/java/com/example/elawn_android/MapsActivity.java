@@ -92,8 +92,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         Polyline polyline = mMap.addPolyline(polyOptions);
 
         //Markers
-        //When
-
+        //When the user clicks the map, add a marker with a clickable snippet
         mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
             @Override
             public void onMapClick(LatLng latLng) {
@@ -161,6 +160,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         Log.i(TAG, "Marker Count: " + String.valueOf(markerCount));
         pathReference.child("Path 1").push().setValue("Latitude: "+marker.getPosition().latitude + " || Longitude: "+marker.getPosition().longitude);
 
+        //assign the user selected coordinate points to LatLng variables m1 to m4
         switch(markerCount) {
             case 1:
                 m1 = new LatLng(marker.getPosition().latitude, marker.getPosition().longitude);
@@ -172,7 +172,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 m4 = new LatLng(marker.getPosition().latitude, marker.getPosition().longitude);
 
         }
-
+        //once user places 4 markers, create a polygon to fill the area
         if(markerCount >=4) {
             PolygonOptions mowArea = new PolygonOptions()
                     .add(m1)
