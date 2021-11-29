@@ -7,47 +7,200 @@
     tools:context=".MainActivity">
 
     <Button
-        android:id="@+id/loginPage"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="56dp"
-        android:layout_marginTop="657dp"
-        android:layout_marginBottom="26dp"
-        android:text="Login Page"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="1.0" />
-
-    <Button
         android:id="@+id/mapsButton"
         android:layout_width="137dp"
         android:layout_height="58dp"
-        android:layout_marginStart="161dp"
-        android:layout_marginTop="360dp"
-        android:layout_marginEnd="162dp"
-        android:layout_marginBottom="250dp"
+        android:layout_marginStart="87dp"
+        android:layout_marginTop="46dp"
+        android:layout_marginEnd="32dp"
+        android:layout_marginBottom="64dp"
         android:text="Maps"
-        app:layout_constraintBottom_toTopOf="@+id/loginPage"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.489"
+        app:layout_constraintBottom_toTopOf="@+id/mapView"
+        app:layout_constraintEnd_toStartOf="@+id/signOutButton"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.0" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <Button
         android:id="@+id/signOutButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="59dp"
-        android:layout_marginTop="657dp"
-        android:layout_marginEnd="68dp"
-        android:layout_marginBottom="26dp"
+        android:layout_width="106dp"
+        android:layout_height="53dp"
+        android:layout_marginTop="30dp"
+        android:layout_marginEnd="30dp"
+        android:layout_marginBottom="85dp"
         android:text="Sign Out"
+        app:layout_constraintBottom_toTopOf="@+id/mapView"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/batteryButton"
+        android:layout_width="164dp"
+        android:layout_height="91dp"
+        android:layout_marginStart="14dp"
+        android:layout_marginBottom="11dp"
+        android:background="@drawable/clear_button"
+        app:layout_constraintBottom_toTopOf="@+id/currentButton"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <TextView
+        android:id="@+id/tempTV"
+        android:layout_width="163dp"
+        android:layout_height="26dp"
+        android:layout_marginEnd="14dp"
+        android:layout_marginBottom="36dp"
+        android:text="4"
+        android:textAlignment="center"
+        android:textSize="20sp"
+        app:layout_constraintBottom_toTopOf="@+id/status"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <Button
+        android:id="@+id/currentButton"
+        android:layout_width="164dp"
+        android:layout_height="91dp"
+        android:layout_marginStart="14dp"
+        android:layout_marginBottom="28dp"
+        android:background="@drawable/clear_button"
+        app:layout_constraintBottom_toTopOf="@+id/status"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <TextView
+        android:id="@+id/compass"
+        android:layout_width="157dp"
+        android:layout_height="32dp"
+        android:layout_marginEnd="14dp"
+        android:text="Compass"
+        android:textAlignment="center"
+        android:textSize="26sp"
+        app:layout_constraintBottom_toTopOf="@+id/compassTV"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <TextView
+        android:id="@+id/compassTV"
+        android:layout_width="155dp"
+        android:layout_height="23dp"
+        android:layout_marginEnd="14dp"
+        android:layout_marginBottom="54dp"
+        android:text="76"
+        android:textAlignment="center"
+        android:textSize="20sp"
+        app:layout_constraintBottom_toTopOf="@+id/temperature"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <Button
+        android:id="@+id/compassButton"
+        android:layout_width="164dp"
+        android:layout_height="91dp"
+        android:layout_marginEnd="14dp"
+        android:layout_marginBottom="11dp"
+        android:background="@drawable/clear_button"
+        app:layout_constraintBottom_toTopOf="@+id/tempButton"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <TextView
+        android:id="@+id/batteryTV"
+        android:layout_width="163dp"
+        android:layout_height="26dp"
+        android:layout_marginStart="14dp"
+        android:layout_marginBottom="51dp"
+        android:text="50%"
+        android:textAlignment="center"
+        android:textSize="20sp"
+        app:layout_constraintBottom_toTopOf="@+id/current"
+        app:layout_constraintEnd_toEndOf="@+id/battery"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <TextView
+        android:id="@+id/battery"
+        android:layout_width="164dp"
+        android:layout_height="33dp"
+        android:layout_marginStart="14dp"
+        android:text="Battery"
+        android:textAlignment="center"
+        android:textSize="26sp"
+        app:layout_constraintBottom_toTopOf="@+id/batteryTV"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <Button
+        android:id="@+id/tempButton"
+        android:layout_width="164dp"
+        android:layout_height="91dp"
+        android:layout_marginEnd="14dp"
+        android:layout_marginBottom="28dp"
+        android:background="@drawable/clear_button"
+        app:layout_constraintBottom_toTopOf="@+id/status"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <TextView
+        android:id="@+id/temperature"
+        android:layout_width="164dp"
+        android:layout_height="33dp"
+        android:layout_marginEnd="14dp"
+        android:text="Temperature"
+        android:textAlignment="center"
+        android:textSize="24sp"
+        app:layout_constraintBottom_toTopOf="@+id/tempTV"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <TextView
+        android:id="@+id/currentTV"
+        android:layout_width="168dp"
+        android:layout_height="29dp"
+        android:layout_marginStart="14dp"
+        android:layout_marginBottom="36dp"
+        android:text="12 A"
+        android:textAlignment="center"
+        android:textSize="20sp"
+        app:layout_constraintBottom_toTopOf="@+id/status"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <TextView
+        android:id="@+id/current"
+        android:layout_width="164dp"
+        android:layout_height="33dp"
+        android:layout_marginStart="14dp"
+        android:layout_marginEnd="37dp"
+        android:text="Current"
+        android:textAlignment="center"
+        android:textSize="26sp"
+        app:layout_constraintBottom_toTopOf="@+id/currentTV"
+        app:layout_constraintEnd_toStartOf="@+id/tempButton"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <Button
+        android:id="@+id/powerButton"
+        android:layout_width="272dp"
+        android:layout_height="44dp"
+        android:layout_marginStart="60dp"
+        android:layout_marginEnd="61dp"
+        android:layout_marginBottom="24dp"
+        android:text="TURN ON"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/loginPage"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="1.0" />
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <com.google.android.gms.maps.MapView
+        android:id="@+id/mapView"
+        android:layout_width="275dp"
+        android:layout_height="237dp"
+        android:layout_marginStart="57dp"
+        android:layout_marginEnd="61dp"
+        android:layout_marginBottom="47dp"
+        app:layout_constraintBottom_toTopOf="@+id/batteryButton"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <TextView
+        android:id="@+id/status"
+        android:layout_width="225dp"
+        android:layout_height="28dp"
+        android:layout_marginStart="94dp"
+        android:layout_marginEnd="74dp"
+        android:layout_marginBottom="16dp"
+        android:text="Status: "
+        android:textSize="18sp"
+        app:layout_constraintBottom_toTopOf="@+id/powerButton"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
