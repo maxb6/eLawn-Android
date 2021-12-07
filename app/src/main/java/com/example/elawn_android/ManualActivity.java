@@ -36,7 +36,7 @@ public class ManualActivity extends AppCompatActivity {
         generalControlReference = FirebaseDatabase.getInstance().getReference("Control").child("MowControl");
 
         //value is set to 0 by default
-        generalControlReference.setValue("0");
+        generalControlReference.setValue(0);
 
         //on forward touch control value is set to 100
         forwardButton.setOnTouchListener(new View.OnTouchListener() {
@@ -45,13 +45,13 @@ public class ManualActivity extends AppCompatActivity {
                 switch(event.getAction()){
                         //while button being held
                     case MotionEvent.ACTION_DOWN:
-                        generalControlReference.setValue("100");
+                        generalControlReference.setValue(100);
                         v.setBackgroundColor(getResources().getColor(R.color.blue));
                         return true;
 
                         //while button released
                     case MotionEvent.ACTION_UP:
-                        generalControlReference.setValue("0");
+                        generalControlReference.setValue(0);
                         v.setBackgroundColor(Color.LTGRAY);
                         return true;
 
@@ -67,13 +67,13 @@ public class ManualActivity extends AppCompatActivity {
                 switch(event.getAction()){
                     //while button being held
                     case MotionEvent.ACTION_DOWN:
-                        generalControlReference.setValue("-100");
+                        generalControlReference.setValue(-100);
                         v.setBackgroundColor(getResources().getColor(R.color.blue));
                         return true;
 
                     //while button released
                     case MotionEvent.ACTION_UP:
-                        generalControlReference.setValue("0");
+                        generalControlReference.setValue(0);
                         v.setBackgroundColor(Color.LTGRAY);
                         return true;
 
