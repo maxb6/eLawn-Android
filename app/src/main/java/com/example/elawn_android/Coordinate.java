@@ -4,10 +4,10 @@ public class Coordinate {
 
     private float lat,lon;
 
-    public Coordinate(float lat, float lon)
+    public Coordinate(double lat, double lon)
     {
-        this.lat = lat;
-        this.lon = lon;
+        this.lat = (float) lat;
+        this.lon = (float) lon;
 
     }
 
