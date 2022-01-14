@@ -32,11 +32,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private int markerCount = 0;
     private static String TAG = "Path";
     private static DatabaseReference pathReference;
+    private static DatabaseReference perimeterReference;
+    private static DatabaseReference gpsReference;
+
 
     private LatLng m1;
     private LatLng m2;
     private LatLng m3;
     private LatLng m4;
+
+    private Coordinate vertex = new Coordinate(0,0);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,6 +49,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         pathReference = FirebaseDatabase.getInstance().getReference("Users")
                 .child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child("Mower Paths");
+        perimeterReference = FirebaseDatabase.getInstance().getReference("Users")
+                .child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child("Perimeter");
+
+        gpsReference = FirebaseDatabase.getInstance().getReference("GPS").child("Perimeter");
 
         binding = ActivityMapsBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
@@ -159,6 +168,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         marker.showInfoWindow();
         Log.i(TAG, "Marker Count: " + String.valueOf(markerCount));
         pathReference.child("Path 1").push().setValue("Latitude: "+marker.getPosition().latitude + " || Longitude: "+marker.getPosition().longitude);
+
+        //Setting vertex coordinates in the firebase
+        vertex.setLat((float) marker.getPosition().latitude);
+        vertex.setLon((float) marker.getPosition().longitude);
+        perimeterReference.child("V"+markerCount).setValue(vertex);
+        gpsReference.child("V"+markerCount).setValue(vertex);
 
         //assign the user selected coordinate points to LatLng variables m1 to m4
         switch(markerCount) {
