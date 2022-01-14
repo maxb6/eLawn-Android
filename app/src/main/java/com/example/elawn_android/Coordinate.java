@@ -20,4 +20,13 @@ public class Coordinate {
     {
         return lon;
     }
+
+    public void setLat(float nlat){
+        lat = nlat;
+    }
+
+    public void setLon(float nLon)
+    {
+        lon = nLon;
+    }
 }

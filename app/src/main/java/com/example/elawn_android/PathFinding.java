@@ -36,6 +36,16 @@ public class PathFinding {
         return midpoint;
     }
 
+    public Coordinate movedCoordinate(Coordinate c1, Double distance, Double bearing)
+    {
+        float nLat= (float)(c1.getLat() + (Math.sin(Math.toRadians(bearing)) * distance));
+        float nLon = (float)(c1.getLon() + (Math.sin(Math.toRadians(bearing)) * distance));
+
+        Coordinate nc = new Coordinate(nLat, nLon);
+
+        return nc;
+    }
+
     public double getDistance(Coordinate c1, Coordinate c2)
     {
         final int R = 6371; // Radius of the earth
@@ -56,31 +66,91 @@ public class PathFinding {
         return distance;
     }
 
-    public void pathAlgorithm()
-    {
+    public double bearing(Coordinate c1, Coordinate c2){
+
+        float lat1 = c1.getLat();
+        float lat2 = c2.getLat();
+        float lon1 = c1.getLon();
+        float lon2 = c2.getLon();
+
+        double longitude1 = lon1;
+        double longitude2 = lon2;
+        double latitude1 = Math.toRadians(lat1);
+        double latitude2 = Math.toRadians(lat2);
+        double longDiff= Math.toRadians(longitude2-longitude1);
+        double y= Math.sin(longDiff)*Math.cos(latitude2);
+        double x=Math.cos(latitude1)*Math.sin(latitude2)-Math.sin(latitude1)*Math.cos(latitude2)*Math.cos(longDiff);
+
+        return (Math.toDegrees(Math.atan2(y, x))+360)%360;
+    }
+
+    public void pathAlgorithm() {
+
         path.add(v1);
         path.add(v2);
 
-        Coordinate midpoint;
-        List<Coordinate> mids = new ArrayList<Coordinate>();
+        double distance_v2_v3 = getDistance(v2, v3);
+        int numb_midpoints_v2_v3 = (int) Math.ceil(distance_v2_v3 / mowerWidth);
+        double bearing_v2_v3 = bearing(v2, v3);
 
-        for(int i =0; i<=1; i++){
-            if(getDistance(v1,v2) > mowerWidth){
-                midpoint = getMidpoint(v1, v2);
+        List<Coordinate> topCoordinates = new ArrayList<Coordinate>();
 
-                mids.add(midpoint);
-                //something recursive should be going on here
-            }
-            else{
+        for (int i = 0; i < numb_midpoints_v2_v3; i++) {
+            Coordinate currentPoint;
+            Coordinate newPoint;
 
-            }
+            currentPoint = v2;
+            newPoint = movedCoordinate(currentPoint, mowerWidth, bearing_v2_v3);
+            topCoordinates.add(newPoint);
+            currentPoint = newPoint;
         }
 
+        double distance_v1_v4 = getDistance(v1, v4);
+        int numb_midpoints_v1_v4 = (int) Math.ceil(distance_v1_v4 / mowerWidth);
+        double bearing_v1_v4 = bearing(v1, v4);
 
-        if(getDistance(v2,v3) > mowerWidth)
+        List<Coordinate> bottomCoordinates = new ArrayList<Coordinate>();
+
+        for (int i = 0; i < numb_midpoints_v1_v4; i++) {
+            Coordinate currentPoint;
+            Coordinate newPoint;
+            currentPoint = v1;
+            newPoint = movedCoordinate(currentPoint, mowerWidth, bearing_v1_v4);
+            bottomCoordinates.add(newPoint);
+            currentPoint = newPoint;
+        }
+
+        int total_points = topCoordinates.size() + bottomCoordinates.size();
+
+        path.add(topCoordinates.get(1));
+        path.add(bottomCoordinates.get(1));
+        path.add(bottomCoordinates.get(2));
+
+        int j = 2;
+
+        for (int i = 2; i <= total_points; i++)
         {
+            if(i>topCoordinates.size())
+            {
+                path.add(topCoordinates.get(topCoordinates.size()-1));
+            }
+            else if(i<topCoordinates.size())
+            {
+                path.add(topCoordinates.get(i));
+                path.add(topCoordinates.get(++i));
+            }
 
+            if(j>bottomCoordinates.size())
+            {
+                path.add(topCoordinates.get(bottomCoordinates.size()-1));
+            }
+            else if(j<bottomCoordinates.size())
+            {
+                path.add(bottomCoordinates.get(++j));
+                path.add(bottomCoordinates.get(++j));
+            }
         }
 
+        //Populate Firebase
     }
 }
