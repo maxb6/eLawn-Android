@@ -1,14 +1,113 @@
 package com.example.elawn_android;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Queue;
 
 public class PathFinding {
 
-    Coordinate v1, v2, v3, v4; // = new Coordinate();
+    Queue<Coordinate> path = new Queue<Coordinate>() {
+        @Override
+        public boolean add(Coordinate coordinate) {
+            return false;
+        }
 
-    Queue<Coordinate> path;
+        @Override
+        public boolean offer(Coordinate coordinate) {
+            return false;
+        }
+
+        @Override
+        public Coordinate remove() {
+            return null;
+        }
+
+        @Nullable
+        @Override
+        public Coordinate poll() {
+            return null;
+        }
+
+        @Override
+        public Coordinate element() {
+            return null;
+        }
+
+        @Nullable
+        @Override
+        public Coordinate peek() {
+            return null;
+        }
+
+        @Override
+        public int size() {
+            return 0;
+        }
+
+        @Override
+        public boolean isEmpty() {
+            return false;
+        }
+
+        @Override
+        public boolean contains(@Nullable Object o) {
+            return false;
+        }
+
+        @NonNull
+        @Override
+        public Iterator<Coordinate> iterator() {
+            return null;
+        }
+
+        @NonNull
+        @Override
+        public Object[] toArray() {
+            return new Object[0];
+        }
+
+        @NonNull
+        @Override
+        public <T> T[] toArray(@NonNull T[] a) {
+            return null;
+        }
+
+        @Override
+        public boolean remove(@Nullable Object o) {
+            return false;
+        }
+
+        @Override
+        public boolean containsAll(@NonNull Collection<?> c) {
+            return false;
+        }
+
+        @Override
+        public boolean addAll(@NonNull Collection<? extends Coordinate> c) {
+            return false;
+        }
+
+        @Override
+        public boolean removeAll(@NonNull Collection<?> c) {
+            return false;
+        }
+
+        @Override
+        public boolean retainAll(@NonNull Collection<?> c) {
+            return false;
+        }
+
+        @Override
+        public void clear() {
+
+        }
+    };
+
     double mowerWidth = 1;
 
     public Coordinate getMidpoint(Coordinate c1, Coordinate c2)
@@ -31,7 +130,7 @@ public class PathFinding {
         double lat3 = Math.atan2(Math.sin(lat1) + Math.sin(lat2), Math.sqrt((Math.cos(lat1) + Bx) * (Math.cos(lat1) + Bx) + By * By));
         double lon3 = lon1 + Math.atan2(By, Math.cos(lat1) + Bx);
 
-        Coordinate midpoint = new Coordinate(Math.toDegrees(lat3), Math.toDegrees(lon3));
+        Coordinate midpoint = new Coordinate((float) Math.toDegrees(lat3), (float) Math.toDegrees(lon3));
 
         return midpoint;
     }
@@ -84,7 +183,7 @@ public class PathFinding {
         return (Math.toDegrees(Math.atan2(y, x))+360)%360;
     }
 
-    public void pathAlgorithm() {
+    public void pathAlgorithm(Coordinate v1, Coordinate v2, Coordinate v3, Coordinate v4) {
 
         path.add(v1);
         path.add(v2);
@@ -149,8 +248,11 @@ public class PathFinding {
                 path.add(bottomCoordinates.get(++j));
                 path.add(bottomCoordinates.get(++j));
             }
-        }
 
+            System.out.println(path.peek().getLat());
+            System.out.println(path.peek().getLon()+"--------------");
+
+        }
         //Populate Firebase
     }
 }

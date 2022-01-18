@@ -30,7 +30,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private ActivityMapsBinding binding;
     private Marker marker;
     private int markerCount = 0;
-    private static String TAG = "Path";
+    private static String TAG = "pathAlgo";
     private static DatabaseReference pathReference;
     private static DatabaseReference perimeterReference;
     private static DatabaseReference gpsReference;
@@ -41,7 +41,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private LatLng m3;
     private LatLng m4;
 
-    private Coordinate vertex = new Coordinate(0,0);
+    private Coordinate vertex = new Coordinate();
+    private Coordinate v1 = new Coordinate();
+    private Coordinate v2 = new Coordinate();
+    private Coordinate v3 = new Coordinate();
+    private Coordinate v4 = new Coordinate();
+    private Coordinate c1 = new Coordinate();
+    private Coordinate c2 = new Coordinate();
+    private Coordinate c3 = new Coordinate();
+    private Coordinate c4 = new Coordinate();
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -179,12 +189,24 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         switch(markerCount) {
             case 1:
                 m1 = new LatLng(marker.getPosition().latitude, marker.getPosition().longitude);
+                v1.setLat((float) marker.getPosition().latitude);
+                v1.setLon((float) marker.getPosition().longitude);
+                Log.i(TAG,"Lat " + v1.getLat());
+                Log.i(TAG,"Lon "+ v1.getLon());
+
             case 2:
                 m2 = new LatLng(marker.getPosition().latitude, marker.getPosition().longitude);
+                v2.setLat((float) marker.getPosition().latitude);
+                v2.setLon((float) marker.getPosition().longitude);
+
             case 3:
                 m3 = new LatLng(marker.getPosition().latitude, marker.getPosition().longitude);
+                v3.setLat((float) marker.getPosition().latitude);
+                v3.setLon((float) marker.getPosition().longitude);
             case 4:
                 m4 = new LatLng(marker.getPosition().latitude, marker.getPosition().longitude);
+                v4.setLat((float) marker.getPosition().latitude);
+                v4.setLon((float) marker.getPosition().longitude);
 
         }
         //once user places 4 markers, create a polygon to fill the area
@@ -198,6 +220,30 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     .strokeColor(Color.RED);
 
             Polygon polygon = mMap.addPolygon(mowArea);
+
+
+            PathFinding p = new PathFinding();
+
+            Log.i(TAG,"Lat " + v1.getLat());
+            Log.i(TAG,"Lon "+ v1.getLon());
+
+            //p.pathAlgorithm(v1,v2,v3,v4);
+
+            c1.setLat((float) 45.496177673339844);
+            c1.setLon((float) -73.82414245605469);
+            Log.i(TAG,"Lat " + c1.getLat());
+            Log.i(TAG,"Lon "+ c1.getLon());
+
+            c2.setLat((float) 45.49623107910156);
+            c2.setLon((float) -73.82408905029297);
+
+            c3.setLat((float) 45.4964485168457);
+            c3.setLon((float) -73.8236312866211);
+
+            c4.setLat((float) 45.49603271484375);
+            c4.setLon((float) -73.8231430053711);
+
+            p.pathAlgorithm(c1,c2,c3,c4);
         }
 
     }
