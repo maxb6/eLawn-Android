@@ -243,7 +243,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             c4.setLat((float) 45.49603271484375);
             c4.setLon((float) -73.8231430053711);
 
-            p.pathAlgorithm(c1,c2,c3,c4);
+            //p.pathAlgorithm(c1,c2,c3,c4);
         }
 
     }
