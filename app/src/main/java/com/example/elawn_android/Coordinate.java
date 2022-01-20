@@ -4,11 +4,15 @@ public class Coordinate {
 
     private float lat,lon;
 
-    public Coordinate(double lat, double lon)
+    public Coordinate(float lat, float lon)
     {
-        this.lat = (float) lat;
-        this.lon = (float) lon;
+        this.lat = lat;
+        this.lon = lon;
 
+    }
+
+    public Coordinate ()
+    {
     }
 
     public float getLat()
