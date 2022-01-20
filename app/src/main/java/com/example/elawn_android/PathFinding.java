@@ -187,7 +187,7 @@ public class PathFinding {
 
         path.add(v1);
         path.add(v2);
-
+ 
         double distance_v2_v3 = getDistance(v2, v3);
         int numb_midpoints_v2_v3 = (int) Math.ceil(distance_v2_v3 / mowerWidth);
         double bearing_v2_v3 = bearing(v2, v3);

@@ -114,6 +114,14 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                                 goToModeActivity();
                             }
                         });
+
+                        chargeButton.setText("CHARGE");
+                        chargeButton.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                statusReference.setValue("Charging");
+                            }
+                        });
                     }
 
                     else if(currentStatus.equals("Mowing")){
@@ -125,6 +133,13 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                                 statusReference.setValue("Off");
                             }
                         });
+                        chargeButton.setText("CHARGE");
+                        chargeButton.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                statusReference.setValue("Charging");
+                            }
+                        });
                     }
 
                     else if(currentStatus.equals("Charging")){
@@ -134,6 +149,14 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                             @Override
                             public void onClick(View v) {
                                 goToModeActivity();
+                            }
+                        });
+
+                        chargeButton.setText("END CHARGE");
+                        chargeButton.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                statusReference.setValue("Off");
                             }
                         });
                     }
@@ -149,17 +172,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
             }
         });
-
-        //charge button
-        chargeButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                statusReference.setValue("Charging");
-            }
-        });
-
     }
-
 
 
     @Override
