@@ -25,12 +25,13 @@
         android:layout_width="106dp"
         android:layout_height="53dp"
         android:layout_marginTop="30dp"
-        android:layout_marginEnd="30dp"
+        android:layout_marginEnd="36dp"
         android:layout_marginBottom="85dp"
         android:text="Sign Out"
         app:layout_constraintBottom_toTopOf="@+id/mapView"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.096" />
 
     <Button
         android:id="@+id/batteryButton"
@@ -169,15 +170,27 @@
 
     <Button
         android:id="@+id/powerButton"
-        android:layout_width="272dp"
-        android:layout_height="44dp"
-        android:layout_marginStart="60dp"
-        android:layout_marginEnd="61dp"
-        android:layout_marginBottom="24dp"
+        android:layout_width="177dp"
+        android:layout_height="41dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="10dp"
+        android:layout_marginBottom="29dp"
         android:text="TURN ON"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/chargeButton"
         app:layout_constraintStart_toStartOf="parent" />
+
+    <Button
+        android:id="@+id/chargeButton"
+        android:layout_width="177dp"
+        android:layout_height="41dp"
+        android:layout_marginTop="14dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="29dp"
+        android:text="CHARGE"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/statusTV" />
 
     <com.google.android.gms.maps.MapView
         android:id="@+id/mapView"
@@ -192,15 +205,28 @@
 
     <TextView
         android:id="@+id/status"
-        android:layout_width="225dp"
+        android:layout_width="76dp"
         android:layout_height="28dp"
-        android:layout_marginStart="94dp"
-        android:layout_marginEnd="74dp"
-        android:layout_marginBottom="16dp"
+        android:layout_marginStart="116dp"
+        android:layout_marginEnd="15dp"
+        android:layout_marginBottom="14dp"
         android:text="Status: "
         android:textSize="18sp"
         app:layout_constraintBottom_toTopOf="@+id/powerButton"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/statusTV"
         app:layout_constraintStart_toStartOf="parent" />
+
+    <TextView
+        android:id="@+id/statusTV"
+        android:layout_width="136dp"
+        android:layout_height="29dp"
+        android:layout_marginTop="27dp"
+        android:layout_marginEnd="68dp"
+        android:layout_marginBottom="14dp"
+        android:text="OFF"
+        android:textSize="22sp"
+        app:layout_constraintBottom_toTopOf="@+id/powerButton"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tempButton" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
