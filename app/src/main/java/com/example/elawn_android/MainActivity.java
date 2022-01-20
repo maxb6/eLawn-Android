@@ -1,12 +1,16 @@
 package com.example.elawn_android;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -18,6 +22,11 @@ import com.google.android.gms.maps.model.Polygon;
 import com.google.android.gms.maps.model.PolygonOptions;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback {
 
@@ -28,6 +37,12 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private Button mapsButton;
     private MapView mMapView;
     private Button powerButton;
+    private Button chargeButton;
+    private TextView statusTV;
+    private String currentStatus;
+
+
+    private static DatabaseReference statusReference;
 
     private static final String MAPVIEW_BUNDLE_KEY = "MapViewBundleKey";
 
@@ -39,6 +54,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         signOutButton = findViewById(R.id.signOutButton);
         mapsButton = findViewById(R.id.mapsButton);
         powerButton = findViewById(R.id.powerButton);
+        chargeButton = findViewById(R.id.chargeButton);
+        statusTV = findViewById(R.id.statusTV);
 
 
         mAuth = FirebaseAuth.getInstance();
@@ -70,18 +87,80 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         mMapView.onCreate(mapViewBundle);
         mMapView.getMapAsync(this);
 
+        //Change status text view and power button dependent on mode
+        // Modes: Off, Charging and Mowing
+        // status text view: read firebase status and display in the textview
+        //Power button: allow user to turn on, or off the device
 
-        //power button
+        statusReference = FirebaseDatabase.getInstance().getReference("Control").child("Status");
 
-        powerButton.setOnClickListener(new View.OnClickListener() {
+        statusReference.addValueEventListener(new ValueEventListener() {
+            @SuppressLint("ResourceAsColor")
             @Override
-            public void onClick(View v) {
-                goToModeActivity();
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if(!snapshot.exists()) {
+                    statusTV.setText("No Reading");
+                }
+                else {
+                    currentStatus = snapshot.getValue().toString().trim();
+                    statusTV.setText(currentStatus);
+
+                    if(currentStatus.equals("Off")){
+                        statusTV.setTextColor(Color.RED);
+                        powerButton.setText("TURN ON");
+                        powerButton.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                goToModeActivity();
+                            }
+                        });
+                    }
+
+                    else if(currentStatus.equals("Mowing")){
+                        statusTV.setTextColor(Color.GREEN);
+                        powerButton.setText("TURN OFF");
+                        powerButton.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                statusReference.setValue("Off");
+                            }
+                        });
+                    }
+
+                    else if(currentStatus.equals("Charging")){
+                        powerButton.setText("TURN ON");
+                        statusTV.setTextColor(ContextCompat.getColor(getApplicationContext(),R.color.chargeOrange));
+                        powerButton.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                goToModeActivity();
+                            }
+                        });
+                    }
+
+                    else{
+                        statusTV.setTextColor(Color.BLACK);
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
             }
         });
 
+        //charge button
+        chargeButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                statusReference.setValue("Charging");
+            }
+        });
 
     }
+
+
 
     @Override
     protected void onStart() {

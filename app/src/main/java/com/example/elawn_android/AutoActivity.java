@@ -9,6 +9,9 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Spinner;
 
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+
 public class AutoActivity extends AppCompatActivity {
 
     private Button startButton;
@@ -16,18 +19,31 @@ public class AutoActivity extends AppCompatActivity {
     private Button createPathButton;
     private Spinner pathSpinner;
 
+    private static DatabaseReference statusReference;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_auto);
 
+        startButton = findViewById(R.id.startButton);
         createPathButton = findViewById(R.id.pathButton);
         pathSpinner = findViewById(R.id.pathSpinner);
+
+        statusReference = FirebaseDatabase.getInstance().getReference("Control").child("Status");
 
         createPathButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 goToMapsActivity();
+            }
+        });
+
+        startButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                statusReference.setValue("Mowing");
+                goToMainActivity();
             }
         });
 
@@ -46,6 +62,11 @@ public class AutoActivity extends AppCompatActivity {
 
     private void goToMapsActivity() {
         Intent intent = new Intent (this,MapsActivity.class);
+        startActivity(intent);
+    }
+
+    private void goToMainActivity() {
+        Intent intent = new Intent (this,MainActivity.class);
         startActivity(intent);
     }
 
