@@ -21,4 +21,26 @@ public class SharedPreferencesHelper {
         return sharedPreferences.getBoolean("activity_executed", false);
     }
 
+    public void setCurrentPath(int currentPath) {
+        SharedPreferences.Editor edt = sharedPreferences.edit();
+        edt.putInt("current_path", currentPath);
+        edt.commit();
+    }
+
+    public int getCurrentPath() {
+        return sharedPreferences.getInt("current_path", 0);
+
+    }
+
+    public void setPathNumber(String pathNumber) {
+        SharedPreferences.Editor edt = sharedPreferences.edit();
+        edt.putString("path_number", pathNumber);
+        edt.commit();
+    }
+
+    public String getPathNumber() {
+        return sharedPreferences.getString("path_number", null);
+
+    }
+
 }

@@ -2,9 +2,9 @@ package com.example.elawn_android;
 
 public class Coordinate {
 
-    private float lat,lon;
+    private double lat,lon;
 
-    public Coordinate(float lat, float lon)
+    public Coordinate(double lat, double lon)
     {
         this.lat = lat;
         this.lon = lon;
@@ -15,21 +15,21 @@ public class Coordinate {
     {
     }
 
-    public float getLat()
+    public double getLat()
     {
         return lat;
     }
 
-    public float getLon()
+    public double getLon()
     {
         return lon;
     }
 
-    public void setLat(float nlat){
+    public void setLat(double nlat){
         lat = nlat;
     }
 
-    public void setLon(float nLon)
+    public void setLon(double nLon)
     {
         lon = nLon;
     }
