@@ -113,17 +113,17 @@ public class PathFinding {
     public Coordinate getMidpoint(Coordinate c1, Coordinate c2)
     {
         //midpoint between 2 coordinates
-        float lat1 = c1.getLat();
-        float lat2 = c2.getLat();
-        float lon1 = c1.getLon();
-        float lon2 = c2.getLon();
+        double lat1 = c1.getLat();
+        double lat2 = c2.getLat();
+        double lon1 = c1.getLon();
+        double lon2 = c2.getLon();
 
         double dLon = Math.toRadians(lon2 - lon1);
 
         //convert to radians
-        lat1 = (float) Math.toRadians(lat1);
-        lat2 = (float) Math.toRadians(lat2);
-        lon1 = (float) Math.toRadians(lon1);
+        lat1 = Math.toRadians(lat1);
+        lat2 = Math.toRadians(lat2);
+        lon1 = Math.toRadians(lon1);
 
         double Bx = Math.cos(lat2) * Math.cos(dLon);
         double By = Math.cos(lat2) * Math.sin(dLon);
@@ -149,10 +149,10 @@ public class PathFinding {
     {
         final int R = 6371; // Radius of the earth
 
-        float lat1 = c1.getLat();
-        float lat2 = c2.getLat();
-        float lon1 = c1.getLon();
-        float lon2 = c2.getLon();
+        double lat1 = c1.getLat();
+        double lat2 = c2.getLat();
+        double lon1 = c1.getLon();
+        double lon2 = c2.getLon();
 
         double latDistance = Math.toRadians(lat2 - lat1);
         double lonDistance = Math.toRadians(lon2 - lon1);
@@ -167,10 +167,10 @@ public class PathFinding {
 
     public double bearing(Coordinate c1, Coordinate c2){
 
-        float lat1 = c1.getLat();
-        float lat2 = c2.getLat();
-        float lon1 = c1.getLon();
-        float lon2 = c2.getLon();
+        double lat1 = c1.getLat();
+        double lat2 = c2.getLat();
+        double lon1 = c1.getLon();
+        double lon2 = c2.getLon();
 
         double longitude1 = lon1;
         double longitude2 = lon2;
