@@ -1,117 +1,32 @@
 package com.example.elawn_android;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
+import android.util.Log;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Queue;
+import com.example.elawn_android.Coordinate;
+
+import java.util.*;
 
 public class PathFinding {
 
-    Queue<Coordinate> path = new Queue<Coordinate>() {
-        @Override
-        public boolean add(Coordinate coordinate) {
-            return false;
-        }
+    Coordinate v1, v2, v3, v4; // = new Coordinate();
 
-        @Override
-        public boolean offer(Coordinate coordinate) {
-            return false;
-        }
+    ArrayList<Coordinate> path = new ArrayList<>();
+    ArrayList<Coordinate> topPath = new ArrayList<>();
+    ArrayList<Coordinate> bottomPath = new ArrayList<>();
 
-        @Override
-        public Coordinate remove() {
-            return null;
-        }
 
-        @Nullable
-        @Override
-        public Coordinate poll() {
-            return null;
-        }
+    double mowerWidth = 2.5;
 
-        @Override
-        public Coordinate element() {
-            return null;
-        }
+    public PathFinding(Coordinate v1, Coordinate v2, Coordinate v3, Coordinate v4) {
+        this.v1 = v1;
+        this.v2 = v2;
+        this.v3 = v3;
+        this.v4 = v4;
 
-        @Nullable
-        @Override
-        public Coordinate peek() {
-            return null;
-        }
 
-        @Override
-        public int size() {
-            return 0;
-        }
+    }
 
-        @Override
-        public boolean isEmpty() {
-            return false;
-        }
-
-        @Override
-        public boolean contains(@Nullable Object o) {
-            return false;
-        }
-
-        @NonNull
-        @Override
-        public Iterator<Coordinate> iterator() {
-            return null;
-        }
-
-        @NonNull
-        @Override
-        public Object[] toArray() {
-            return new Object[0];
-        }
-
-        @NonNull
-        @Override
-        public <T> T[] toArray(@NonNull T[] a) {
-            return null;
-        }
-
-        @Override
-        public boolean remove(@Nullable Object o) {
-            return false;
-        }
-
-        @Override
-        public boolean containsAll(@NonNull Collection<?> c) {
-            return false;
-        }
-
-        @Override
-        public boolean addAll(@NonNull Collection<? extends Coordinate> c) {
-            return false;
-        }
-
-        @Override
-        public boolean removeAll(@NonNull Collection<?> c) {
-            return false;
-        }
-
-        @Override
-        public boolean retainAll(@NonNull Collection<?> c) {
-            return false;
-        }
-
-        @Override
-        public void clear() {
-
-        }
-    };
-
-    double mowerWidth = 1;
-
-    public Coordinate getMidpoint(Coordinate c1, Coordinate c2)
-    {
+    public Coordinate getMidpoint(Coordinate c1, Coordinate c2) {
         //midpoint between 2 coordinates
         double lat1 = c1.getLat();
         double lat2 = c2.getLat();
@@ -121,32 +36,30 @@ public class PathFinding {
         double dLon = Math.toRadians(lon2 - lon1);
 
         //convert to radians
-        lat1 = Math.toRadians(lat1);
-        lat2 = Math.toRadians(lat2);
-        lon1 = Math.toRadians(lon1);
+        lat1 =  Math.toRadians(lat1);
+        lat2 =  Math.toRadians(lat2);
+        lon1 =  Math.toRadians(lon1);
 
         double Bx = Math.cos(lat2) * Math.cos(dLon);
         double By = Math.cos(lat2) * Math.sin(dLon);
         double lat3 = Math.atan2(Math.sin(lat1) + Math.sin(lat2), Math.sqrt((Math.cos(lat1) + Bx) * (Math.cos(lat1) + Bx) + By * By));
         double lon3 = lon1 + Math.atan2(By, Math.cos(lat1) + Bx);
 
-        Coordinate midpoint = new Coordinate((float) Math.toDegrees(lat3), (float) Math.toDegrees(lon3));
+        Coordinate midpoint = new Coordinate(Math.toDegrees(lat3), Math.toDegrees(lon3));
 
         return midpoint;
     }
 
-    public Coordinate movedCoordinate(Coordinate c1, Double distance, Double bearing)
-    {
-        float nLat= (float)(c1.getLat() + (Math.sin(Math.toRadians(bearing)) * distance));
-        float nLon = (float)(c1.getLon() + (Math.sin(Math.toRadians(bearing)) * distance));
+    public Coordinate movedCoordinate(Coordinate c1, Double distance, Double bearing) {
+        double nLat = (c1.getLat() + (Math.sin(Math.toRadians(bearing)) * distance));
+        double nLon = (c1.getLon() + (Math.cos(Math.toRadians(bearing)) * distance));
 
         Coordinate nc = new Coordinate(nLat, nLon);
 
         return nc;
     }
 
-    public double getDistance(Coordinate c1, Coordinate c2)
-    {
+    public double getDistance(Coordinate c1, Coordinate c2) {
         final int R = 6371; // Radius of the earth
 
         double lat1 = c1.getLat();
@@ -165,7 +78,7 @@ public class PathFinding {
         return distance;
     }
 
-    public double bearing(Coordinate c1, Coordinate c2){
+    public double bearing(Coordinate c1, Coordinate c2) {
 
         double lat1 = c1.getLat();
         double lat2 = c2.getLat();
@@ -176,83 +89,94 @@ public class PathFinding {
         double longitude2 = lon2;
         double latitude1 = Math.toRadians(lat1);
         double latitude2 = Math.toRadians(lat2);
-        double longDiff= Math.toRadians(longitude2-longitude1);
-        double y= Math.sin(longDiff)*Math.cos(latitude2);
-        double x=Math.cos(latitude1)*Math.sin(latitude2)-Math.sin(latitude1)*Math.cos(latitude2)*Math.cos(longDiff);
+        double longDiff = Math.toRadians(longitude2 - longitude1);
+        double y = Math.sin(longDiff) * Math.cos(latitude2);
+        double x = Math.cos(latitude1) * Math.sin(latitude2) - Math.sin(latitude1) * Math.cos(latitude2) * Math.cos(longDiff);
 
-        return (Math.toDegrees(Math.atan2(y, x))+360)%360;
+        return (Math.toDegrees(Math.atan2(y, x)) + 360) % 360;
     }
 
-    public void pathAlgorithm(Coordinate v1, Coordinate v2, Coordinate v3, Coordinate v4) {
+    public void fillTopLeft(Coordinate v22, Coordinate v33) {
+        Coordinate midpoint = getMidpoint(v22, v33);
 
-        path.add(v1);
-        path.add(v2);
- 
-        double distance_v2_v3 = getDistance(v2, v3);
-        int numb_midpoints_v2_v3 = (int) Math.ceil(distance_v2_v3 / mowerWidth);
-        double bearing_v2_v3 = bearing(v2, v3);
-
-        List<Coordinate> topCoordinates = new ArrayList<Coordinate>();
-
-        for (int i = 0; i < numb_midpoints_v2_v3; i++) {
-            Coordinate currentPoint;
-            Coordinate newPoint;
-
-            currentPoint = v2;
-            newPoint = movedCoordinate(currentPoint, mowerWidth, bearing_v2_v3);
-            topCoordinates.add(newPoint);
-            currentPoint = newPoint;
+        if ((getDistance(v22, v33) > mowerWidth)) {
+            topPath.add((midpoint));
+            fillTopLeft(v22, midpoint);
+            fillTopLeft(midpoint,v33);
         }
 
-        double distance_v1_v4 = getDistance(v1, v4);
-        int numb_midpoints_v1_v4 = (int) Math.ceil(distance_v1_v4 / mowerWidth);
-        double bearing_v1_v4 = bearing(v1, v4);
+    }
 
-        List<Coordinate> bottomCoordinates = new ArrayList<Coordinate>();
 
-        for (int i = 0; i < numb_midpoints_v1_v4; i++) {
-            Coordinate currentPoint;
-            Coordinate newPoint;
-            currentPoint = v1;
-            newPoint = movedCoordinate(currentPoint, mowerWidth, bearing_v1_v4);
-            bottomCoordinates.add(newPoint);
-            currentPoint = newPoint;
+
+    public void fillBottomLeft(Coordinate v22, Coordinate v33) {
+        Coordinate midpoint = getMidpoint(v22, v33);
+
+        if ((getDistance(v22, v33) > mowerWidth)) {
+            bottomPath.add((midpoint));
+            fillBottomLeft(v22, midpoint);
+            fillBottomLeft(midpoint,v33);
         }
 
-        int total_points = topCoordinates.size() + bottomCoordinates.size();
+    }
 
-        path.add(topCoordinates.get(1));
-        path.add(bottomCoordinates.get(1));
-        path.add(bottomCoordinates.get(2));
 
-        int j = 2;
 
-        for (int i = 2; i <= total_points; i++)
+    public ArrayList<Coordinate> pathAlgorithm() {
+
+
+        fillTopLeft(v2, v3);
+        topPath.add(0,v2);
+        topPath.add(v3);
+        fillBottomLeft(v1,v4);
+        bottomPath.add(0,v1);
+        bottomPath.add(v4);
+
+
+        for(int i = 0; i< topPath.size()-1;i++)
         {
-            if(i>topCoordinates.size())
+            for(int j = i+1; j< topPath.size()-1; j++)
             {
-                path.add(topCoordinates.get(topCoordinates.size()-1));
+                if(topPath.get(i).getLat() > topPath.get(j).getLat())
+                {
+                    Collections.swap(topPath,i,j);
+                }
             }
-            else if(i<topCoordinates.size())
-            {
-                path.add(topCoordinates.get(i));
-                path.add(topCoordinates.get(++i));
-            }
+        }
 
-            if(j>bottomCoordinates.size())
+        for(int i = 0; i< bottomPath.size()-1;i++)
+        {
+            for(int j = i+1; j< bottomPath.size(); j++)
             {
-                path.add(topCoordinates.get(bottomCoordinates.size()-1));
+                if((double)bottomPath.get(i).getLat() > (double)bottomPath.get(j).getLat())
+                {
+                    Collections.swap(bottomPath,i,j);
+                }
             }
-            else if(j<bottomCoordinates.size())
-            {
-                path.add(bottomCoordinates.get(++j));
-                path.add(bottomCoordinates.get(++j));
-            }
+        }
 
-            System.out.println(path.peek().getLat());
-            System.out.println(path.peek().getLon()+"--------------");
+
+        int j = 0;
+        for(int i = 0; i<topPath.size()-1; i++)
+        {
+            path.add(topPath.get(i));
+            if(j< topPath.size())
+            {
+                path.add(bottomPath.get(j++));
+                path.add(bottomPath.get(j++));
+            }
+            path.add(topPath.get(++i));
 
         }
-        //Populate Firebase
+
+
+        for (Coordinate s : path) {
+            System.out.println(s.toString());
+            //Log.i("PATH-FINDING","Path finding algorithm : LAT:  " + s.getLat() + "--------LON: "+ s.getLon());
+        }
+
+
+        return path;
+
     }
 }

@@ -112,6 +112,7 @@ public class AutoActivity extends AppCompatActivity {
             }
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
+
                 currentPath = 0;
             }
         });
