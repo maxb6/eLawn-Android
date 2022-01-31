@@ -200,10 +200,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         vertex.setLat( marker.getPosition().latitude);
         vertex.setLon(marker.getPosition().longitude);
 
-        String finalPathNumber = spHelper.getPathNumber();
-        Log.i(TAG,"Path number Final:" +finalPathNumber);
+       String finalPathNumber = spHelper.getPathNumber();
+        Log.i(TAG,"Path number pre:" +finalPathNumber);
 
-        pathReference.child("3").child("V"+markerCount).setValue(vertex);
+        pathReference.child(finalPathNumber).child("V"+markerCount).setValue(vertex);
 
         //assign the user selected coordinate points to LatLng variables m1 to m4
         switch(markerCount) {
@@ -249,6 +249,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
             int pathNumber = Integer.parseInt(spHelper.getPathNumber())+1;
             spHelper.setPathNumber(String.valueOf(pathNumber));
+            Log.i(TAG,"Path number f: "+ pathNumber);
 
         }
 
