@@ -28,12 +28,16 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback,GoogleMap.OnMarkerClickListener,GoogleMap.OnMarkerDragListener, GoogleMap.OnInfoWindowClickListener {
 
     private GoogleMap mMap;
     private ActivityMapsBinding binding;
     private Marker marker;
     private int markerCount = 0;
+    private int coordCount = 0;
     private static String TAG = "pathAlgo";
     private static DatabaseReference pathReference;
     private static DatabaseReference perimeterReference;
@@ -73,7 +77,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         perimeterReference = FirebaseDatabase.getInstance().getReference("Users")
                 .child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child("Perimeter");
 
-        gpsReference = FirebaseDatabase.getInstance().getReference("GPS").child("Perimeter");
+        gpsReference = FirebaseDatabase.getInstance().getReference("GPS");
 
         userReference = FirebaseDatabase.getInstance().getReference("Users")
                 .child(FirebaseAuth.getInstance().getCurrentUser().getUid());
@@ -102,30 +106,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         //coordinates
 
         LatLng centerField = new LatLng(45.496264, -73.823371);
-
-        /*
-        LatLng m1 = new LatLng(45.496748, -73.823077);
-        LatLng m2 = new LatLng(45.496315, -73.822631);
-        LatLng m3 = new LatLng(45.495788, -73.823675);
-        LatLng m4 = new LatLng(45.496220, -73.824112);
-
-         */
-
-        LatLng m5 = new LatLng(45.495787, -73.823670);
-        LatLng m6 = new LatLng(45.496220, -73.824108);
-        LatLng m7 = new LatLng(45.496223, -73.824101);
-        LatLng m8 = new LatLng(45.495795, -73.823661);
-
-        //Polyline
-
-        PolylineOptions polyOptions = new PolylineOptions()
-                .add(m5)
-                .add(m6)
-                .add(m7)
-                .add(m8)
-                .width(7);
-
-        Polyline polyline = mMap.addPolyline(polyOptions);
 
         //Markers
         //When the user clicks the map, add a marker with a clickable snippet
@@ -241,8 +221,36 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
             Polygon polygon = mMap.addPolygon(mowArea);
 
+            //use path finding algorithm to find coordinates for all polyline paths
 
-            PathFinding p = new PathFinding();
+            PathFinding p = new PathFinding(v1,v2,v3,v4);
+
+            ArrayList<Coordinate> algo = new ArrayList<Coordinate>();
+            algo = p.pathAlgorithm();
+
+            //create a map with the coordinate names as the key and the LatLng objects as the values
+            //this map will hold all coordinates generated from the algorithm
+
+            HashMap<String, LatLng> pathCoordinates = new HashMap<String, LatLng>();
+            PolylineOptions mowPath = new PolylineOptions();
+
+            //iterate through the arraylist of coordinates and fill the map with the coordinates
+            //map example (m1,lat-lng)
+
+            for (Coordinate s : algo) {
+                ++coordCount;
+                Log.i("PATH-FINDING","Path finding algorithm : LAT:  " + s.getLat() + "--------LON: "+ s.getLon());
+                //add each coordinate point to the polyline path
+                mowPath.add(new LatLng(s.getLat(),s.getLon())).width(7);
+
+                pathCoordinates.put("m"+coordCount,new LatLng(s.getLat(),s.getLon()));
+                gpsReference.child("Path Coordinates").child(String.valueOf(coordCount)).setValue(s);
+            }
+
+            Log.i(TAG,"created path" +pathCoordinates);
+
+            //insert the created polyline onto the map
+            Polyline polyline = mMap.addPolyline(mowPath);
 
             Log.i(TAG,"Lat " + v1.getLat());
             Log.i(TAG,"Lon "+ v1.getLon());
