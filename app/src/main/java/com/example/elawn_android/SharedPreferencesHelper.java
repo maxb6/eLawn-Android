@@ -43,4 +43,15 @@ public class SharedPreferencesHelper {
 
     }
 
+    public void setNextPathNumber(String pathNumber) {
+        SharedPreferences.Editor edt = sharedPreferences.edit();
+        edt.putString("next_path_number", pathNumber);
+        edt.commit();
+    }
+
+    public String getNextPathNumber() {
+        return sharedPreferences.getString("next_path_number", null);
+
+    }
+
 }

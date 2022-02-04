@@ -11,7 +11,10 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -22,6 +25,8 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polygon;
 import com.google.android.gms.maps.model.PolygonOptions;
+import com.google.android.gms.maps.model.Polyline;
+import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.ChildEventListener;
@@ -52,6 +57,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private String currentStatus;
     protected int currentPath;
     private SharedPreferencesHelper spHelper;
+    private Spinner mainSpinner;
 
     private HashMap<String, Coordinate> vertexCoordinates = new HashMap<String, Coordinate>();
     //protected ArrayList<Coordinate> vertexCoordinates = new ArrayList<Coordinate>();
@@ -63,9 +69,16 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private LatLng m3;
     private LatLng m4;
 
+    private Coordinate v1 = new Coordinate();
+    private Coordinate v2 = new Coordinate();
+    private Coordinate v3 = new Coordinate();
+    private Coordinate v4 = new Coordinate();
+
+
     private static DatabaseReference statusReference;
     private DatabaseReference userReference;
     private DatabaseReference gpsReference;
+    private DatabaseReference pathReference;
 
 
     private static final String MAPVIEW_BUNDLE_KEY = "MapViewBundleKey";
@@ -82,13 +95,18 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         powerButton = findViewById(R.id.powerButton);
         chargeButton = findViewById(R.id.chargeButton);
         statusTV = findViewById(R.id.statusTV);
+        mainSpinner = findViewById(R.id.mainSpinner);
 
         //get current path from firebase
-
         userReference = FirebaseDatabase.getInstance().getReference("Users")
                 .child(FirebaseAuth.getInstance().getCurrentUser().getUid());
 
+        userReference.child("Current Path").setValue(0);
+
         gpsReference = FirebaseDatabase.getInstance().getReference("GPS").child("Perimeter");
+
+        pathReference = FirebaseDatabase.getInstance().getReference("Users")
+                .child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child("Mower Paths");
 
         mAuth = FirebaseAuth.getInstance();
 
@@ -96,6 +114,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             @Override
             public void onClick(View v) {
                 mAuth.signOut();
+                spHelper.setUserLogIn(false);
                 goToLoginActivity();
             }
         });
@@ -107,8 +126,58 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
         });
 
+        //spinner code --------------------------------------------------------------------------
+        ArrayList<String> spinnerOptions = new ArrayList<>();
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, spinnerOptions);
+        //set the spinners adapter to the previously created one.
+        mainSpinner.setAdapter(adapter);
 
-        //mapView code
+        //Read paths in database and place path options in spinner
+        pathReference.addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+                spinnerOptions.add("Path "+ snapshot.getKey());
+                adapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+
+            }
+
+            @Override
+            public void onChildRemoved(@NonNull DataSnapshot snapshot) {
+
+            }
+
+            @Override
+            public void onChildMoved(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
+        //get path number from selected path spinner
+        mainSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                currentPath = Integer.parseInt(mainSpinner.getSelectedItem().toString().substring(5));
+                //Log.i("Current Path","Current Path: "+ currentPath);
+                //set current path in firebase
+                userReference.child("Current Path").setValue(currentPath);
+            }
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                currentPath = 0;
+            }
+        });
+
+
+        //mapView code ---------------------------------------------------------------------------
 
         Bundle mapViewBundle = null;
         if (savedInstanceState != null) {
@@ -290,16 +359,25 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
                         switch(childCount) {
                             case 1:
+
                                 m1 = new LatLng(coordinate.getLat(),coordinate.getLon());
+                                v1.setLat(coordinate.getLat());
+                                v1.setLon(coordinate.getLon());
 
                             case 2:
                                 m2 = new LatLng(coordinate.getLat(),coordinate.getLon());
+                                v2.setLat(coordinate.getLat());
+                                v2.setLon(coordinate.getLon());
 
                             case 3:
                                 m3 = new LatLng(coordinate.getLat(),coordinate.getLon());
+                                v3.setLat(coordinate.getLat());
+                                v3.setLon(coordinate.getLon());
 
                             case 4:
                                 m4 = new LatLng(coordinate.getLat(),coordinate.getLon());
+                                v4.setLat(coordinate.getLat());
+                                v4.setLon(coordinate.getLon());
 
                         }
 
@@ -313,6 +391,34 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                                     .strokeColor(Color.RED);
 
                             Polygon polygon = mMap.addPolygon(mowArea);
+
+                            //use path finding algorithm to find coordinates for all polyline paths
+
+                            PathFinding p = new PathFinding(v1,v2,v3,v4);
+
+                            ArrayList<Coordinate> algo = new ArrayList<Coordinate>();
+                            algo = p.pathAlgorithm();
+
+                            //create a map with the coordinate names as the key and the LatLng objects as the values
+                            //this map will hold all coordinates generated from the algorithm
+
+                            HashMap<String, LatLng> pathCoordinates = new HashMap<String, LatLng>();
+                            PolylineOptions mowPath = new PolylineOptions();
+
+                            //iterate through the arraylist of coordinates and fill the map with the coordinates
+                            //map example (m1,lat-lng)
+
+                            for (Coordinate s : algo) {
+                                Log.i("PATH-FINDING","Path finding algorithm : LAT:  " + s.getLat() + "--------LON: "+ s.getLon());
+                                //add each coordinate point to the polyline path
+                                mowPath.add(new LatLng(s.getLat(),s.getLon())).width(4);
+
+                            }
+
+                            Log.i(TAG,"created path" +pathCoordinates);
+
+                            //insert the created polyline onto the map
+                            Polyline polyline = mMap.addPolyline(mowPath);
                         }
 
                         //vertexCoordinates.put(String.valueOf(childCount),coordinate);
@@ -349,7 +455,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         userReference.child("Mower Paths").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                userReference.child("Number of Paths").setValue(snapshot.getChildrenCount());
+                String pathNumber = String.valueOf(snapshot.getChildrenCount());
+                userReference.child("Number of Paths").setValue(pathNumber);
+                //set path number to amount of mower paths
+                spHelper.setPathNumber(pathNumber);
             }
 
             @Override
@@ -360,7 +469,12 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     }
 
+    private void setCurrentPath(String currentPath){
 
+        userReference.child("Number of Paths").setValue(currentPath);
+        spHelper.setPathNumber(currentPath);
+
+    }
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
