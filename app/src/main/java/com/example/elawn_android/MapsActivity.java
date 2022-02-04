@@ -1,12 +1,10 @@
 package com.example.elawn_android;
 
-import androidx.annotation.NonNull;
 import androidx.fragment.app.FragmentActivity;
 
 import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
-import android.widget.Switch;
 import android.widget.Toast;
 
 import com.example.elawn_android.databinding.ActivityMapsBinding;
@@ -22,11 +20,8 @@ import com.google.android.gms.maps.model.PolygonOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -48,6 +43,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private String pathNumber;
     private String currentPath = "4" ;
+    private String nextPathNumber;
     private boolean allowWrite;
 
 
@@ -61,10 +57,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private Coordinate v2 = new Coordinate();
     private Coordinate v3 = new Coordinate();
     private Coordinate v4 = new Coordinate();
-    private Coordinate c1 = new Coordinate();
-    private Coordinate c2 = new Coordinate();
-    private Coordinate c3 = new Coordinate();
-    private Coordinate c4 = new Coordinate();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -180,10 +172,21 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         vertex.setLat( marker.getPosition().latitude);
         vertex.setLon(marker.getPosition().longitude);
 
-       String finalPathNumber = spHelper.getPathNumber();
-        Log.i(TAG,"Path number pre:" +finalPathNumber);
+        /*
+        //if the path number exists, get previous path number, add 1 otherwise set the path number to 1
+        if(spHelper.getPathNumber() != null) {
+            finalPathNumber = spHelper.getPathNumber();
+            Log.i(TAG, "Path number pre:" + finalPathNumber);
+        }
+        else{
+            finalPathNumber = "1";
+            spHelper.setPathNumber("1");
+        }
 
         pathReference.child(finalPathNumber).child("V"+markerCount).setValue(vertex);
+
+
+         */
 
         //assign the user selected coordinate points to LatLng variables m1 to m4
         switch(markerCount) {
@@ -211,6 +214,28 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
         //once user places 4 markers, create a polygon to fill the area
         if(markerCount >=4) {
+
+            //write the selected coordinates to the firebase
+
+            //if the path number exists, get previous path number, add 1 otherwise set the path number to 1
+            if(spHelper.getPathNumber() != null) {
+                //add one to the current path number
+                int pathNumber = Integer.parseInt(spHelper.getPathNumber())+1;
+                nextPathNumber = String.valueOf(pathNumber);
+                Log.i(TAG, "Path number pre:" + nextPathNumber);
+            }
+            else{
+                nextPathNumber = "1";
+                spHelper.setPathNumber("1");
+            }
+
+            pathReference.child(nextPathNumber).child("V1").setValue(v1);
+            pathReference.child(nextPathNumber).child("V2").setValue(v2);
+            pathReference.child(nextPathNumber).child("V3").setValue(v3);
+            pathReference.child(nextPathNumber).child("V4").setValue(v4);
+
+
+
             PolygonOptions mowArea = new PolygonOptions()
                     .add(m1)
                     .add(m2)
@@ -255,9 +280,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             Log.i(TAG,"Lat " + v1.getLat());
             Log.i(TAG,"Lon "+ v1.getLon());
 
+
+            //once the 4 points have been placed we can increment to the next path number
+
             int pathNumber = Integer.parseInt(spHelper.getPathNumber())+1;
             spHelper.setPathNumber(String.valueOf(pathNumber));
             Log.i(TAG,"Path number f: "+ pathNumber);
+
+
 
         }
 
@@ -265,20 +295,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     //a function to set the current path from the firebase
 
-    private String setCurrentPath(){
+    private void setCurrentPath(String currentPath){
 
-        userReference.child("Number of Paths").addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                spHelper.setPathNumber(snapshot.getValue().toString());
-            }
+        userReference.child("Number of Paths").setValue(currentPath);
+        spHelper.setPathNumber(currentPath);
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        });
-        return pathNumber;
     }
+
 
 }

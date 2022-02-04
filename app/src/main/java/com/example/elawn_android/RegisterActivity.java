@@ -36,6 +36,8 @@ public class RegisterActivity extends AppCompatActivity {
 
     private FirebaseAuth mAuth;
 
+    SharedPreferencesHelper spHelper;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -47,6 +49,8 @@ public class RegisterActivity extends AppCompatActivity {
         signUpButton = findViewById(R.id.signUpButton);
         loginReturnButton = findViewById(R.id.loginReturnButton);
         registerProgressBar = findViewById(R.id.signUpProgressBar);
+
+        spHelper = new SharedPreferencesHelper(this);
 
         mAuth = FirebaseAuth.getInstance();
 
@@ -128,6 +132,7 @@ public class RegisterActivity extends AppCompatActivity {
                                     }else{
                                         Toast.makeText(RegisterActivity.this,"Failed to register! Try again. ",Toast.LENGTH_LONG).show();
                                     }
+                                    spHelper.setPathNumber(null);
                                     registerProgressBar.setVisibility(View.GONE);
                                 }
                             });
