@@ -269,7 +269,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 mowPath.add(new LatLng(s.getLat(),s.getLon())).width(7);
 
                 pathCoordinates.put("m"+coordCount,new LatLng(s.getLat(),s.getLon()));
-                gpsReference.child("Path Coordinates").child(String.valueOf(coordCount)).setValue(s);
+
+                //place path coordinates into firebase user node
+                //userReference.child("Path Coordinates").child(nextPathNumber).child(String.valueOf(coordCount)).setValue(s);
+
+                //place current path coordinates in firebase gps node
+                //gpsReference.child("Path Coordinates").child(String.valueOf(coordCount)).setValue(s);
             }
 
             Log.i(TAG,"created path" +pathCoordinates);
