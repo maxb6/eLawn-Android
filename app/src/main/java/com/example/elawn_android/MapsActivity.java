@@ -1,13 +1,26 @@
 package com.example.elawn_android;
 
+import androidx.annotation.NonNull;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentActivity;
 
+import android.Manifest;
+import android.content.Context;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
 
 import com.example.elawn_android.databinding.ActivityMapsBinding;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -19,15 +32,20 @@ import com.google.android.gms.maps.model.Polygon;
 import com.google.android.gms.maps.model.PolygonOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback,GoogleMap.OnMarkerClickListener,GoogleMap.OnMarkerDragListener, GoogleMap.OnInfoWindowClickListener {
+public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, GoogleMap.OnMarkerClickListener, GoogleMap.OnMarkerDragListener, GoogleMap.OnInfoWindowClickListener {
 
+    private static final int LOCATION_REQUEST_CODE = 99;
     private GoogleMap mMap;
     private ActivityMapsBinding binding;
     private Marker marker;
@@ -42,7 +60,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private SharedPreferencesHelper spHelper;
 
     private String pathNumber;
-    private String currentPath = "4" ;
+    private String currentPath = "4";
     private String nextPathNumber;
     private boolean allowWrite;
 
@@ -57,6 +75,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private Coordinate v2 = new Coordinate();
     private Coordinate v3 = new Coordinate();
     private Coordinate v4 = new Coordinate();
+
+    FusedLocationProviderClient fusedLocationProviderClient;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,7 +102,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-        //setCurrentPath();
+        //use location tracking to track users location
+        getUserLocation();
+
 
     }
 
@@ -105,7 +127,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             @Override
             public void onMapClick(LatLng latLng) {
 
-
                 if (marker != null) {
                     marker.remove();
                 }
@@ -126,9 +147,23 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap.setOnMarkerDragListener(this);
         mMap.setOnInfoWindowClickListener(this);
 
-        //Default camera position
+        //Read firebase current user location and set camera
 
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(centerField, 18));
+        gpsReference.child("Current User Location").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                Coordinate userLocationFB = snapshot.getValue(Coordinate.class);
+
+                LatLng userLocation = new LatLng(userLocationFB.getLat(),userLocationFB.getLon());
+
+                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(userLocation, 18));
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
     }
 
     //Marker override functions
@@ -298,6 +333,42 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     }
 
+    private void getUserLocation(){
+        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
+
+        //check if user has permission set
+        if(ContextCompat.checkSelfPermission(this,Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            fusedLocationProviderClient.getLastLocation().addOnSuccessListener(this, new OnSuccessListener<Location>() {
+                @Override
+                public void onSuccess(Location location) {
+                    Coordinate userLocation = new Coordinate(location.getLatitude(), location.getLongitude());
+                    gpsReference.child("Current User Location").setValue(userLocation);
+                }
+            });
+        }
+
+        //request permissions if user hasn't allowed yet
+        else{
+            if(ContextCompat.checkSelfPermission(this,Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED){
+                ActivityCompat.requestPermissions(this,new String[] {Manifest.permission.ACCESS_FINE_LOCATION},LOCATION_REQUEST_CODE);
+            }
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        if(requestCode == LOCATION_REQUEST_CODE){
+            if(grantResults.length>0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
+                getUserLocation();
+            }
+            else{
+
+            }
+        }
+    }
+
     //a function to set the current path from the firebase
 
     private void setCurrentPath(String currentPath){
@@ -306,6 +377,5 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         spHelper.setPathNumber(currentPath);
 
     }
-
 
 }

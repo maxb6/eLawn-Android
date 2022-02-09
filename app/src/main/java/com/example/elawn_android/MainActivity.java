@@ -347,11 +347,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
         });
 
-
-        //Place camera
-        LatLng centerField = new LatLng(45.496264, -73.823371);
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(centerField, 19));
-
     }
 
     private void setGPSPathCoordinates(int path) {
@@ -414,10 +409,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                             HashMap<String, LatLng> pathCoordinates = new HashMap<String, LatLng>();
                             PolylineOptions mowPath = new PolylineOptions();
 
-                            //for each different path chosen, clear the firebase node, reset the coord count and
-                            //write the new path coordinates to the firebase
+                            //for each different path chosen, clear the firebase node, reset the coord count,
+                            //write the new path coordinates to the firebase and move the camera to the current path
                             coordCount = 0;
                             gpsReference.child("Path Coordinates").setValue("0");
+                            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(m1,17));
 
                             //iterate through the arraylist of coordinates and fill the map with the coordinates
                             //map example (m1,lat-lng)
@@ -487,7 +483,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private void mowerMarker(){
 
-        gpsReference.child("Current Location").addValueEventListener(new ValueEventListener() {
+        gpsReference.child("Current Mower Location").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
 
@@ -503,16 +499,18 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 Bitmap mowerIcon = Bitmap.createScaledBitmap(b, 100, 100, false);
                 mowMarkerOptions.icon(BitmapDescriptorFactory.fromBitmap(mowerIcon));
 
+                //if there is no marker, add the marker to the app
                 if (mowMarker == null){
                     mowMarkerOptions.position(mowerLocation);
                     mowMarker = mMap.addMarker(mowMarkerOptions);
-                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mowerLocation,17));
+                    //mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mowerLocation,17));
                 }
 
-                    //set updated location
-                    mowMarker.setPosition(mowerLocation);
-                    //move camera on update
-                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mowerLocation,17));
+                //once there is a marker
+                //set updated location, everytime the current mower location changes
+                mowMarker.setPosition(mowerLocation);
+                //move camera on update
+                //mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mowerLocation,17));
 
 
             }
