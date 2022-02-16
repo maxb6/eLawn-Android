@@ -1,9 +1,5 @@
 package com.example.elawn_android;
 
-import android.util.Log;
-
-import com.example.elawn_android.Coordinate;
-
 import java.util.*;
 
 public class PathFinding {
@@ -15,7 +11,7 @@ public class PathFinding {
     ArrayList<Coordinate> bottomPath = new ArrayList<>();
 
 
-    double mowerWidth = 2.5;
+    double mowerWidth = 5; //Width of mower in meters
 
     public PathFinding(Coordinate v1, Coordinate v2, Coordinate v3, Coordinate v4) {
         this.v1 = v1;
@@ -36,9 +32,9 @@ public class PathFinding {
         double dLon = Math.toRadians(lon2 - lon1);
 
         //convert to radians
-        lat1 =  Math.toRadians(lat1);
-        lat2 =  Math.toRadians(lat2);
-        lon1 =  Math.toRadians(lon1);
+        lat1 = Math.toRadians(lat1);
+        lat2 = Math.toRadians(lat2);
+        lon1 = Math.toRadians(lon1);
 
         double Bx = Math.cos(lat2) * Math.cos(dLon);
         double By = Math.cos(lat2) * Math.sin(dLon);
@@ -50,14 +46,7 @@ public class PathFinding {
         return midpoint;
     }
 
-    public Coordinate movedCoordinate(Coordinate c1, Double distance, Double bearing) {
-        double nLat = (c1.getLat() + (Math.sin(Math.toRadians(bearing)) * distance));
-        double nLon = (c1.getLon() + (Math.cos(Math.toRadians(bearing)) * distance));
 
-        Coordinate nc = new Coordinate(nLat, nLon);
-
-        return nc;
-    }
 
     public double getDistance(Coordinate c1, Coordinate c2) {
         final int R = 6371; // Radius of the earth
@@ -78,23 +67,6 @@ public class PathFinding {
         return distance;
     }
 
-    public double bearing(Coordinate c1, Coordinate c2) {
-
-        double lat1 = c1.getLat();
-        double lat2 = c2.getLat();
-        double lon1 = c1.getLon();
-        double lon2 = c2.getLon();
-
-        double longitude1 = lon1;
-        double longitude2 = lon2;
-        double latitude1 = Math.toRadians(lat1);
-        double latitude2 = Math.toRadians(lat2);
-        double longDiff = Math.toRadians(longitude2 - longitude1);
-        double y = Math.sin(longDiff) * Math.cos(latitude2);
-        double x = Math.cos(latitude1) * Math.sin(latitude2) - Math.sin(latitude1) * Math.cos(latitude2) * Math.cos(longDiff);
-
-        return (Math.toDegrees(Math.atan2(y, x)) + 360) % 360;
-    }
 
     public void fillTopLeft(Coordinate v22, Coordinate v33) {
         Coordinate midpoint = getMidpoint(v22, v33);
@@ -106,7 +78,6 @@ public class PathFinding {
         }
 
     }
-
 
 
     public void fillBottomLeft(Coordinate v22, Coordinate v33) {
@@ -124,10 +95,9 @@ public class PathFinding {
 
     public ArrayList<Coordinate> pathAlgorithm() {
 
-
         fillTopLeft(v2, v3);
-        topPath.add(0,v2);
-        topPath.add(v3);
+        // topPath.add(0,v2);
+        //topPath.add(v3);
         fillBottomLeft(v1,v4);
         bottomPath.add(0,v1);
         bottomPath.add(v4);
@@ -137,7 +107,7 @@ public class PathFinding {
         {
             for(int j = i+1; j< topPath.size()-1; j++)
             {
-                if(topPath.get(i).getLat() > topPath.get(j).getLat())
+                if(topPath.get(i).getLon() > topPath.get(j).getLon())
                 {
                     Collections.swap(topPath,i,j);
                 }
@@ -148,7 +118,7 @@ public class PathFinding {
         {
             for(int j = i+1; j< bottomPath.size(); j++)
             {
-                if((double)bottomPath.get(i).getLat() > (double)bottomPath.get(j).getLat())
+                if((double)bottomPath.get(i).getLon() > (double)bottomPath.get(j).getLon())
                 {
                     Collections.swap(bottomPath,i,j);
                 }
@@ -156,27 +126,62 @@ public class PathFinding {
         }
 
 
-        int j = 0;
-        for(int i = 0; i<topPath.size()-1; i++)
+
+
+        int maxSize;
+
+        if(topPath.size() > bottomPath.size())
         {
-            path.add(topPath.get(i));
-            if(j< topPath.size())
+            maxSize = topPath.size();
+        }
+        else
+        {
+            maxSize = bottomPath.size();
+        }
+
+        path.add(topPath.get(0));
+        int j = 0;
+
+        for(int i = 1; i<maxSize-1; i++)
+        {
+
+            if(j< bottomPath.size()-1)
             {
                 path.add(bottomPath.get(j++));
                 path.add(bottomPath.get(j++));
             }
-            path.add(topPath.get(++i));
+            else if(j >= bottomPath.size())
+            {
+                path.add(bottomPath.get(bottomPath.size()-1));
+            }
+
+            if(i<topPath.size()-1)
+            {
+                path.add(topPath.get(i++));
+                path.add(topPath.get(i));
+            }
+
+            else if(i>=topPath.size())
+            {
+                path.add(topPath.get(topPath.size()-1));
+            }
 
         }
 
 
+        path.add(0,v2);
+        path.add(0,v1);
+        path.add(v3);
+        path.add(v4);
+
         for (Coordinate s : path) {
             System.out.println(s.toString());
-            //Log.i("PATH-FINDING","Path finding algorithm : LAT:  " + s.getLat() + "--------LON: "+ s.getLon());
         }
 
 
         return path;
+
+
 
     }
 }
