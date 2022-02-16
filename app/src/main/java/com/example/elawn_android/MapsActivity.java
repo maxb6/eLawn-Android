@@ -6,25 +6,25 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentActivity;
 
 import android.Manifest;
-import android.content.Context;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.VectorDrawable;
 import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
-import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
 
 import com.example.elawn_android.databinding.ActivityMapsBinding;
 import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -48,8 +48,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private static final int LOCATION_REQUEST_CODE = 99;
     private GoogleMap mMap;
     private ActivityMapsBinding binding;
-    private Marker marker;
-    private int markerCount = 0;
+    private Marker vertexMarker;
+    private int markerCount;
     private int coordCount = 0;
     private static String TAG = "pathAlgo";
     private static DatabaseReference pathReference;
@@ -75,6 +75,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private Coordinate v2 = new Coordinate();
     private Coordinate v3 = new Coordinate();
     private Coordinate v4 = new Coordinate();
+
+    private MarkerOptions chargingMarkerOptions = new MarkerOptions();
+    private MarkerOptions chargingMarkerOptionsStatic = new MarkerOptions();
+    private Marker chargingMarker;
 
     FusedLocationProviderClient fusedLocationProviderClient;
 
@@ -105,6 +109,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         //use location tracking to track users location
         getUserLocation();
 
+        markerCount =1;
+
 
     }
 
@@ -112,12 +118,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
         mMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
-
-        // Add a marker in Sydney and move the camera
-        LatLng montreal = new LatLng(45.5, -73.56);
-        mMap.addMarker(new MarkerOptions().position(montreal).title("Marker in Montreal"));
-
-        //coordinates
 
         LatLng centerField = new LatLng(45.496264, -73.823371);
 
@@ -127,19 +127,46 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             @Override
             public void onMapClick(LatLng latLng) {
 
-                if (marker != null) {
-                    marker.remove();
+                if (vertexMarker != null) {
+                    vertexMarker.remove();
                 }
 
                 //allows user to pick 4 points with markers
-                if (markerCount < 4) {
-                    marker = mMap.addMarker(new MarkerOptions()
+                if (markerCount <= 4) {
+                    vertexMarker = mMap.addMarker(new MarkerOptions()
                             .position(latLng)
                             .draggable(true)
                             .title("Select mowing points")
                             .snippet("Click to confirm point selection"));
-                    marker.showInfoWindow();
+                    vertexMarker.showInfoWindow();
                 }
+
+                if (markerCount == 5){
+                    //set charging icon marker and make it smaller in size
+                    BitmapDrawable bitmapDraw = (BitmapDrawable)getResources().getDrawable(R.drawable.charging_icon_blue);
+                    Bitmap b = bitmapDraw.getBitmap();
+                    Bitmap chargingIcon = Bitmap.createScaledBitmap(b, 100, 100, false);
+                    chargingMarkerOptions.icon(BitmapDescriptorFactory.fromBitmap(chargingIcon));
+                    chargingMarkerOptionsStatic.icon(BitmapDescriptorFactory.fromBitmap(chargingIcon));
+
+
+                    if (chargingMarker != null) {
+                        chargingMarker.remove();
+                    }
+
+                    //place a charging marker if the marker doesn't exist
+                    chargingMarker = mMap.addMarker(chargingMarkerOptions
+                            .position(latLng)
+                            .draggable(true)
+                            .title("Select charging point")
+                            .snippet("Click to confirm charging point selection"));
+                    chargingMarker.showInfoWindow();
+                }
+
+                if (markerCount > 5){
+                    chargingMarker.remove();
+                }
+
             }
         });
 
@@ -171,7 +198,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public boolean onMarkerClick(Marker marker) {
 
-        Toast.makeText(this, "My position " + marker.getPosition(), Toast.LENGTH_SHORT).show();
+        //Toast.makeText(this, "My position " + marker.getPosition(), Toast.LENGTH_SHORT).show();
         return false;
     }
 
@@ -188,78 +215,62 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onMarkerDragEnd(Marker marker) {
 
-        Toast.makeText(this, "My position " + marker.getPosition(), Toast.LENGTH_SHORT).show();
+        //Toast.makeText(this, "My position " + marker.getPosition(), Toast.LENGTH_SHORT).show();
 
     }
 
     @Override
     public void onInfoWindowClick(Marker marker) {
-        markerCount++;
-        Toast.makeText(this, "Marker Count: "+ String.valueOf(markerCount), Toast.LENGTH_SHORT).show();
-        marker = mMap.addMarker(new MarkerOptions()
-                .position(marker.getPosition())
-                .title("Point " + String.valueOf(markerCount)));
-        marker.showInfoWindow();
-        Log.i(TAG, "Marker Count: " + String.valueOf(markerCount));
-        //pathReference.child("Path 1").setValue("Latitude: "+marker.getPosition().latitude + " || Longitude: "+marker.getPosition().longitude);
 
-        //Setting vertex coordinates in the firebase
-        vertex.setLat( marker.getPosition().latitude);
-        vertex.setLon(marker.getPosition().longitude);
-
-        /*
-        //if the path number exists, get previous path number, add 1 otherwise set the path number to 1
-        if(spHelper.getPathNumber() != null) {
-            finalPathNumber = spHelper.getPathNumber();
-            Log.i(TAG, "Path number pre:" + finalPathNumber);
-        }
-        else{
-            finalPathNumber = "1";
-            spHelper.setPathNumber("1");
+        if(markerCount == 1){
+            m1 = new LatLng(marker.getPosition().latitude, marker.getPosition().longitude);
+            v1.setLat(marker.getPosition().latitude);
+            v1.setLon(marker.getPosition().longitude);
+            Log.i(TAG,"Lat " + v1.getLat());
+            Log.i(TAG,"Lon "+ v1.getLon());
+            marker = mMap.addMarker(new MarkerOptions()
+                    .position(marker.getPosition())
+                    .title("Point " + String.valueOf(markerCount)));
+            marker.showInfoWindow();
         }
 
-        pathReference.child(finalPathNumber).child("V"+markerCount).setValue(vertex);
-
-
-         */
-
-        //assign the user selected coordinate points to LatLng variables m1 to m4
-        switch(markerCount) {
-            case 1:
-                m1 = new LatLng(marker.getPosition().latitude, marker.getPosition().longitude);
-                v1.setLat(marker.getPosition().latitude);
-                v1.setLon(marker.getPosition().longitude);
-                Log.i(TAG,"Lat " + v1.getLat());
-                Log.i(TAG,"Lon "+ v1.getLon());
-
-            case 2:
-                m2 = new LatLng(marker.getPosition().latitude, marker.getPosition().longitude);
-                v2.setLat(marker.getPosition().latitude);
-                v2.setLon(marker.getPosition().longitude);
-
-            case 3:
-                m3 = new LatLng(marker.getPosition().latitude, marker.getPosition().longitude);
-                v3.setLat(marker.getPosition().latitude);
-                v3.setLon(marker.getPosition().longitude);
-            case 4:
-                m4 = new LatLng(marker.getPosition().latitude, marker.getPosition().longitude);
-                v4.setLat(marker.getPosition().latitude);
-                v4.setLon(marker.getPosition().longitude);
-
+        if(markerCount ==2){
+            m2 = new LatLng(marker.getPosition().latitude, marker.getPosition().longitude);
+            v2.setLat(marker.getPosition().latitude);
+            v2.setLon(marker.getPosition().longitude);
+            marker = mMap.addMarker(new MarkerOptions()
+                    .position(marker.getPosition())
+                    .title("Point " + String.valueOf(markerCount)));
+            marker.showInfoWindow();
         }
-        //once user places 4 markers, create a polygon to fill the area
-        if(markerCount >=4) {
+
+        if(markerCount == 3){
+            m3 = new LatLng(marker.getPosition().latitude, marker.getPosition().longitude);
+            v3.setLat(marker.getPosition().latitude);
+            v3.setLon(marker.getPosition().longitude);
+            marker = mMap.addMarker(new MarkerOptions()
+                    .position(marker.getPosition())
+                    .title("Point " + String.valueOf(markerCount)));
+            marker.showInfoWindow();
+        }
+
+        if(markerCount == 4) {
+            m4 = new LatLng(marker.getPosition().latitude, marker.getPosition().longitude);
+            v4.setLat(marker.getPosition().latitude);
+            v4.setLon(marker.getPosition().longitude);
+            marker = mMap.addMarker(new MarkerOptions()
+                    .position(marker.getPosition())
+                    .title("Point " + String.valueOf(markerCount)));
 
             //write the selected coordinates to the firebase
-
+            Toast.makeText(this, "Mowing area successfully placed ", Toast.LENGTH_LONG).show();
             //if the path number exists, get previous path number, add 1 otherwise set the path number to 1
-            if(spHelper.getPathNumber() != null) {
+            if (spHelper.getPathNumber() != null) {
                 //add one to the current path number
-                int pathNumber = Integer.parseInt(spHelper.getPathNumber())+1;
+                int pathNumber = Integer.parseInt(spHelper.getPathNumber()) + 1;
                 nextPathNumber = String.valueOf(pathNumber);
                 Log.i(TAG, "Path number pre:" + nextPathNumber);
-            }
-            else{
+            } else {
                 nextPathNumber = "1";
                 spHelper.setPathNumber("1");
             }
@@ -268,7 +279,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             pathReference.child(nextPathNumber).child("V2").setValue(v2);
             pathReference.child(nextPathNumber).child("V3").setValue(v3);
             pathReference.child(nextPathNumber).child("V4").setValue(v4);
-
 
 
             PolygonOptions mowArea = new PolygonOptions()
@@ -283,7 +293,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
             //use path finding algorithm to find coordinates for all polyline paths
 
-            PathFinding p = new PathFinding(v1,v2,v3,v4);
+            PathFinding p = new PathFinding(v1, v2, v3, v4);
 
             ArrayList<Coordinate> algo = new ArrayList<Coordinate>();
             algo = p.pathAlgorithm();
@@ -299,19 +309,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
             for (Coordinate s : algo) {
                 ++coordCount;
-                Log.i("PATH-FINDING","Path finding algorithm : LAT:  " + s.getLat() + "--------LON: "+ s.getLon());
+                Log.i("PATH-FINDING", "Path finding algorithm : LAT:  " + s.getLat() + "--------LON: " + s.getLon());
                 //add each coordinate point to the polyline path
-                mowPath.add(new LatLng(s.getLat(),s.getLon())).width(7);
+                mowPath.add(new LatLng(s.getLat(), s.getLon())).width(7);
 
-                pathCoordinates.put("m"+coordCount,new LatLng(s.getLat(),s.getLon()));
+                pathCoordinates.put("m" + coordCount, new LatLng(s.getLat(), s.getLon()));
 
-                //place path coordinates into firebase user node
-                //userReference.child("Path Coordinates").child(nextPathNumber).child(String.valueOf(coordCount)).setValue(s);
-
-                //place current path coordinates in firebase gps node
-                //gpsReference.child("Path Coordinates").child(String.valueOf(coordCount)).setValue(s);
             }
-
             Log.i(TAG,"created path" +pathCoordinates);
 
             //insert the created polyline onto the map
@@ -321,19 +325,29 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             Log.i(TAG,"Lon "+ v1.getLon());
 
 
-            //once the 4 points have been placed we can increment to the next path number
+        }
 
-            int pathNumber = Integer.parseInt(spHelper.getPathNumber())+1;
-            spHelper.setPathNumber(String.valueOf(pathNumber));
-            Log.i(TAG,"Path number f: "+ pathNumber);
+        if(markerCount == 5){
+            Toast.makeText(this, "Charging point successfully placed ", Toast.LENGTH_LONG).show();
+            Marker chargeMarker = mMap.addMarker(chargingMarkerOptionsStatic
+                    .position(marker.getPosition())
+                    .title("Charging Point"));
+
+            //write the charging point to firebase
+
+            Coordinate vCharge = new Coordinate(chargeMarker.getPosition().latitude,chargeMarker.getPosition().longitude);
+            pathReference.child(nextPathNumber).child("Charge Point").setValue(vCharge);
 
 
 
         }
 
+        //Toast.makeText(this, "Marker Count: "+ String.valueOf(markerCount), Toast.LENGTH_SHORT).show();
+        //iterate marker count for each time a window is clicked
+        markerCount++;
     }
 
-    private void getUserLocation(){
+  private void getUserLocation(){
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
 
         //check if user has permission set
@@ -367,15 +381,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
             }
         }
-    }
-
-    //a function to set the current path from the firebase
-
-    private void setCurrentPath(String currentPath){
-
-        userReference.child("Number of Paths").setValue(currentPath);
-        spHelper.setPathNumber(currentPath);
-
     }
 
 }

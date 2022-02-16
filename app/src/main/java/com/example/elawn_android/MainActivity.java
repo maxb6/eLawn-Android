@@ -11,6 +11,8 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
+import android.os.CountDownTimer;
+import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -50,6 +52,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private GoogleMap mMap;
     private MarkerOptions mowMarkerOptions = new MarkerOptions();
     private Marker mowMarker;
+    private MarkerOptions chargingMarkerOptions = new MarkerOptions();
+    private Marker chargingMarker;
     private static final String TAG = "MainActivity";
     private static final String MAP_VIEW_BUNDLE_KEY = "MapViewBundleKey";
     private FirebaseAuth mAuth;
@@ -64,6 +68,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     protected int currentPath;
     private SharedPreferencesHelper spHelper;
     private Spinner mainSpinner;
+    ArrayList<Coordinate> pathAlgo = new ArrayList<Coordinate>();
 
     private HashMap<String, Coordinate> vertexCoordinates = new HashMap<String, Coordinate>();
     //protected ArrayList<Coordinate> vertexCoordinates = new ArrayList<Coordinate>();
@@ -219,6 +224,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                         powerButton.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
+                                //simulateMowerMovement();
                                 goToModeActivity();
                             }
                         });
@@ -334,8 +340,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     childCount = 1;
                     mMap.clear();
                     mowMarker = null;
+                    chargingMarker = null;
                     setGPSPathCoordinates(currentPath);
                     mowerMarker();
+                    chargingMarker();
                     //Log.i(TAG, "Vertex Coordinates Array: Lat:" + vertexCoordinates.get(1).getLat()
                     //  + "     Lon:" + vertexCoordinates.get(1).getLon());
                 }
@@ -359,33 +367,41 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
 
                         Coordinate coordinate = snapshot.getValue(Coordinate.class);
-                        gpsReference.child("Perimeter").child(snapshot.getKey()).setValue(coordinate);
+                        //gpsReference.child("Perimeter").child(snapshot.getKey()).setValue(coordinate);
 
                         switch(childCount) {
                             case 1:
 
+                                gpsReference.child("Current Charger Location").setValue(coordinate);
+
+                            case 2:
                                 m1 = new LatLng(coordinate.getLat(),coordinate.getLon());
                                 v1.setLat(coordinate.getLat());
                                 v1.setLon(coordinate.getLon());
+                                gpsReference.child("Perimeter").child("V1").setValue(coordinate);
 
-                            case 2:
+                            case 3:
                                 m2 = new LatLng(coordinate.getLat(),coordinate.getLon());
                                 v2.setLat(coordinate.getLat());
                                 v2.setLon(coordinate.getLon());
+                                gpsReference.child("Perimeter").child("V2").setValue(coordinate);
 
-                            case 3:
+                            case 4:
                                 m3 = new LatLng(coordinate.getLat(),coordinate.getLon());
                                 v3.setLat(coordinate.getLat());
                                 v3.setLon(coordinate.getLon());
+                                gpsReference.child("Perimeter").child("V3").setValue(coordinate);
 
-                            case 4:
+
+                            case 5:
                                 m4 = new LatLng(coordinate.getLat(),coordinate.getLon());
                                 v4.setLat(coordinate.getLat());
                                 v4.setLon(coordinate.getLon());
+                                gpsReference.child("Perimeter").child("V4").setValue(coordinate);
 
                         }
 
-                        if (childCount >= 4) {
+                        if (childCount > 4) {
                             PolygonOptions mowArea = new PolygonOptions()
                                     .add(m1)
                                     .add(m2)
@@ -400,8 +416,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
                             PathFinding p = new PathFinding(v1,v2,v3,v4);
 
-                            ArrayList<Coordinate> algo = new ArrayList<Coordinate>();
-                            algo = p.pathAlgorithm();
+                            pathAlgo = p.pathAlgorithm();
 
                             //create a map with the coordinate names as the key and the LatLng objects as the values
                             //this map will hold all coordinates generated from the algorithm
@@ -413,12 +428,12 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                             //write the new path coordinates to the firebase and move the camera to the current path
                             coordCount = 0;
                             gpsReference.child("Path Coordinates").setValue("0");
-                            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(m1,17));
+                            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(m1,19));
 
                             //iterate through the arraylist of coordinates and fill the map with the coordinates
                             //map example (m1,lat-lng)
 
-                            for (Coordinate s : algo) {
+                            for (Coordinate s : pathAlgo) {
                                 ++coordCount;
                                 Log.i("PATH-FINDING","Path finding algorithm : LAT:  " + s.getLat() + "--------LON: "+ s.getLon());
                                 //add each coordinate point to the polyline path
@@ -522,12 +537,84 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         });
     }
 
+    private void chargingMarker(){
+
+        gpsReference.child("Current Charger Location").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+
+                //obtain coordinate from firebase as latlng value
+                Coordinate chargerCoordinate = snapshot.getValue(Coordinate.class);
+
+                LatLng chargerLocation = new LatLng(chargerCoordinate.getLat(), chargerCoordinate.getLon());
+
+                //make mower icon marker smaller in size
+                BitmapDrawable bitmapDraw = (BitmapDrawable) getResources().getDrawable(R.drawable.charging_icon_blue);
+                Bitmap b = bitmapDraw.getBitmap();
+                Bitmap chargingIcon = Bitmap.createScaledBitmap(b, 100, 100, false);
+                chargingMarkerOptions.icon(BitmapDescriptorFactory.fromBitmap(chargingIcon));
+
+                //if there is no marker, add the marker to the app
+                if (chargingMarker == null) {
+                    chargingMarkerOptions.position(chargerLocation);
+                    chargingMarker = mMap.addMarker(chargingMarkerOptions);
+                }
+
+                //once there is a marker
+                //set updated location, everytime the current charger location changes
+                chargingMarker.setPosition(chargerLocation);
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+    }
+
     private void setCurrentPath(String currentPath){
 
         userReference.child("Number of Paths").setValue(currentPath);
         spHelper.setPathNumber(currentPath);
 
     }
+
+    private void simulateMowerMovement() {
+
+
+        for (Coordinate coordinate : pathAlgo) {
+            new CountDownTimer(1000, 1000) {
+                @Override
+                public void onTick(long millisUntilFinished) {
+                    gpsReference.child("Current Mower Location").setValue(coordinate);
+                }
+
+                @Override
+                public void onFinish() {
+                }
+            }.start();
+        }
+
+
+
+
+        for (Coordinate coordinate : pathAlgo) {
+            final Handler handler = new Handler();
+            handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    // Do something after amount of seconds below (each 1000 = 1s)
+                    // for (Coordinate coordinate : pathAlgo) {
+                    gpsReference.child("Current Mower Location").setValue(coordinate);
+                    // }
+                }
+            }, 1 * 1000);
+        }
+    }
+
+
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
