@@ -11,7 +11,7 @@ public class PathFinding {
     ArrayList<Coordinate> bottomPath = new ArrayList<>();
 
 
-    double mowerWidth = 5; //Width of mower in meters
+    double mowerWidth = 1; //Width of mower in meters
 
     public PathFinding(Coordinate v1, Coordinate v2, Coordinate v3, Coordinate v4) {
         this.v1 = v1;

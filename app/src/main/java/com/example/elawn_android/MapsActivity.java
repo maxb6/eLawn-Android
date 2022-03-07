@@ -64,7 +64,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private String nextPathNumber;
     private boolean allowWrite;
 
-
     private LatLng m1;
     private LatLng m2;
     private LatLng m3;
@@ -75,7 +74,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private Coordinate v2 = new Coordinate();
     private Coordinate v3 = new Coordinate();
     private Coordinate v4 = new Coordinate();
+    private Coordinate vCharge = new Coordinate();
 
+
+    private PolylineOptions mowPath = new PolylineOptions();
     private MarkerOptions chargingMarkerOptions = new MarkerOptions();
     private MarkerOptions chargingMarkerOptionsStatic = new MarkerOptions();
     private Marker chargingMarker;
@@ -109,7 +111,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         //use location tracking to track users location
         getUserLocation();
 
-        markerCount =1;
+        markerCount = 1;
 
 
     }
@@ -126,6 +128,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
             @Override
             public void onMapClick(LatLng latLng) {
+                double lat = latLng.latitude;
+                double lon = latLng.longitude;
 
                 if (vertexMarker != null) {
                     vertexMarker.remove();
@@ -139,11 +143,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                             .title("Select mowing points")
                             .snippet("Click to confirm point selection"));
                     vertexMarker.showInfoWindow();
+                    mMap.animateCamera(CameraUpdateFactory.newLatLng(latLng));
+
                 }
 
-                if (markerCount == 5){
+                if (markerCount == 5) {
                     //set charging icon marker and make it smaller in size
-                    BitmapDrawable bitmapDraw = (BitmapDrawable)getResources().getDrawable(R.drawable.charging_icon_blue);
+                    BitmapDrawable bitmapDraw = (BitmapDrawable) getResources().getDrawable(R.drawable.charging_icon_blue);
                     Bitmap b = bitmapDraw.getBitmap();
                     Bitmap chargingIcon = Bitmap.createScaledBitmap(b, 100, 100, false);
                     chargingMarkerOptions.icon(BitmapDescriptorFactory.fromBitmap(chargingIcon));
@@ -161,9 +167,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                             .title("Select charging point")
                             .snippet("Click to confirm charging point selection"));
                     chargingMarker.showInfoWindow();
+                    mMap.animateCamera(CameraUpdateFactory.newLatLng(latLng));
                 }
 
-                if (markerCount > 5){
+                if (markerCount > 5) {
                     chargingMarker.remove();
                 }
 
@@ -181,7 +188,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 Coordinate userLocationFB = snapshot.getValue(Coordinate.class);
 
-                LatLng userLocation = new LatLng(userLocationFB.getLat(),userLocationFB.getLon());
+                LatLng userLocation = new LatLng(userLocationFB.getLat(), userLocationFB.getLon());
 
                 mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(userLocation, 18));
             }
@@ -203,38 +210,21 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     @Override
-    public void onMarkerDragStart(Marker marker) {
-
-    }
-
-    @Override
-    public void onMarkerDrag(Marker marker) {
-
-    }
-
-    @Override
-    public void onMarkerDragEnd(Marker marker) {
-
-        //Toast.makeText(this, "My position " + marker.getPosition(), Toast.LENGTH_SHORT).show();
-
-    }
-
-    @Override
     public void onInfoWindowClick(Marker marker) {
 
-        if(markerCount == 1){
+        if (markerCount == 1) {
             m1 = new LatLng(marker.getPosition().latitude, marker.getPosition().longitude);
             v1.setLat(marker.getPosition().latitude);
             v1.setLon(marker.getPosition().longitude);
-            Log.i(TAG,"Lat " + v1.getLat());
-            Log.i(TAG,"Lon "+ v1.getLon());
+            Log.i(TAG, "Lat " + v1.getLat());
+            Log.i(TAG, "Lon " + v1.getLon());
             marker = mMap.addMarker(new MarkerOptions()
                     .position(marker.getPosition())
                     .title("Point " + String.valueOf(markerCount)));
             marker.showInfoWindow();
         }
 
-        if(markerCount ==2){
+        if (markerCount == 2) {
             m2 = new LatLng(marker.getPosition().latitude, marker.getPosition().longitude);
             v2.setLat(marker.getPosition().latitude);
             v2.setLon(marker.getPosition().longitude);
@@ -244,7 +234,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             marker.showInfoWindow();
         }
 
-        if(markerCount == 3){
+        if (markerCount == 3) {
             m3 = new LatLng(marker.getPosition().latitude, marker.getPosition().longitude);
             v3.setLat(marker.getPosition().latitude);
             v3.setLon(marker.getPosition().longitude);
@@ -254,7 +244,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             marker.showInfoWindow();
         }
 
-        if(markerCount == 4) {
+        if (markerCount == 4) {
             m4 = new LatLng(marker.getPosition().latitude, marker.getPosition().longitude);
             v4.setLat(marker.getPosition().latitude);
             v4.setLon(marker.getPosition().longitude);
@@ -302,7 +292,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             //this map will hold all coordinates generated from the algorithm
 
             HashMap<String, LatLng> pathCoordinates = new HashMap<String, LatLng>();
-            PolylineOptions mowPath = new PolylineOptions();
 
             //iterate through the arraylist of coordinates and fill the map with the coordinates
             //map example (m1,lat-lng)
@@ -316,29 +305,26 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 pathCoordinates.put("m" + coordCount, new LatLng(s.getLat(), s.getLon()));
 
             }
-            Log.i(TAG,"created path" +pathCoordinates);
-
-            //insert the created polyline onto the map
-            Polyline polyline = mMap.addPolyline(mowPath);
-
-            Log.i(TAG,"Lat " + v1.getLat());
-            Log.i(TAG,"Lon "+ v1.getLon());
-
+            Log.i(TAG, "created path" + pathCoordinates);
 
         }
 
-        if(markerCount == 5){
+        if (markerCount == 5) {
             Toast.makeText(this, "Charging point successfully placed ", Toast.LENGTH_LONG).show();
             Marker chargeMarker = mMap.addMarker(chargingMarkerOptionsStatic
                     .position(marker.getPosition())
                     .title("Charging Point"));
 
             //write the charging point to firebase
-
-            Coordinate vCharge = new Coordinate(chargeMarker.getPosition().latitude,chargeMarker.getPosition().longitude);
+            vCharge.setLat(chargeMarker.getPosition().latitude);
+            vCharge.setLon(chargeMarker.getPosition().longitude);
             pathReference.child(nextPathNumber).child("Charge Point").setValue(vCharge);
 
+            //add the charging point to the end of the mow path
+            mowPath.add(new LatLng(vCharge.getLat(), vCharge.getLon()));
 
+            //insert the created polyline onto the map
+            Polyline polyline = mMap.addPolyline(mowPath);
 
         }
 
@@ -347,11 +333,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         markerCount++;
     }
 
-  private void getUserLocation(){
+    private void getUserLocation() {
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
 
         //check if user has permission set
-        if(ContextCompat.checkSelfPermission(this,Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             fusedLocationProviderClient.getLastLocation().addOnSuccessListener(this, new OnSuccessListener<Location>() {
                 @Override
                 public void onSuccess(Location location) {
@@ -362,9 +348,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
 
         //request permissions if user hasn't allowed yet
-        else{
-            if(ContextCompat.checkSelfPermission(this,Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED){
-                ActivityCompat.requestPermissions(this,new String[] {Manifest.permission.ACCESS_FINE_LOCATION},LOCATION_REQUEST_CODE);
+        else {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_REQUEST_CODE);
             }
         }
     }
@@ -373,14 +359,27 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
-        if(requestCode == LOCATION_REQUEST_CODE){
-            if(grantResults.length>0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
+        if (requestCode == LOCATION_REQUEST_CODE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 getUserLocation();
-            }
-            else{
+            } else {
 
             }
         }
     }
 
+    @Override
+    public void onMarkerDragStart(Marker marker) {
+
+    }
+
+    @Override
+    public void onMarkerDrag(Marker marker) {
+
+    }
+
+    @Override
+    public void onMarkerDragEnd(Marker marker) {
+
+    }
 }
