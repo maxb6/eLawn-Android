@@ -3,13 +3,17 @@ package com.example.elawn_android;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
+import android.location.Location;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
@@ -21,6 +25,8 @@ import android.widget.Button;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
@@ -33,6 +39,7 @@ import com.google.android.gms.maps.model.Polygon;
 import com.google.android.gms.maps.model.PolygonOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.ChildEventListener;
@@ -49,6 +56,7 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback {
 
+    private static final int LOCATION_REQUEST_CODE = 99;
     private GoogleMap mMap;
     private MarkerOptions mowMarkerOptions = new MarkerOptions();
     private Marker mowMarker;
@@ -63,6 +71,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private MapView mMapView;
     private Button powerButton;
     private Button chargeButton;
+    private TextView batteryTV;
+    private TextView compassTV;
+    private TextView currentTV;
+    private TextView tempTV;
     private TextView statusTV;
     private String currentStatus;
     protected int currentPath;
@@ -80,17 +92,23 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private LatLng m2;
     private LatLng m3;
     private LatLng m4;
+    private LatLng mCharge;
 
     private Coordinate v1 = new Coordinate();
     private Coordinate v2 = new Coordinate();
     private Coordinate v3 = new Coordinate();
     private Coordinate v4 = new Coordinate();
 
+    private float mowerRotation;
+    private LatLng mowerLocation = new LatLng(0,0);
 
     private static DatabaseReference statusReference;
     private DatabaseReference userReference;
     private DatabaseReference gpsReference;
     private DatabaseReference pathReference;
+    private DatabaseReference ATMegaReference;
+
+    FusedLocationProviderClient fusedLocationProviderClient;
 
 
     private static final String MAPVIEW_BUNDLE_KEY = "MapViewBundleKey";
@@ -106,6 +124,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         mapsButton = findViewById(R.id.mapsButton);
         powerButton = findViewById(R.id.powerButton);
         chargeButton = findViewById(R.id.chargeButton);
+        compassTV = findViewById(R.id.compassTV);
+        batteryTV = findViewById(R.id.batteryTV);
+        currentTV = findViewById(R.id.currentTV);
+        tempTV = findViewById(R.id.tempTV);
         statusTV = findViewById(R.id.statusTV);
         mainSpinner = findViewById(R.id.mainSpinner);
 
@@ -119,6 +141,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         pathReference = FirebaseDatabase.getInstance().getReference("Users")
                 .child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child("Mower Paths");
+
+        ATMegaReference = FirebaseDatabase.getInstance().getReference("ATMega");
 
         mAuth = FirebaseAuth.getInstance();
 
@@ -288,6 +312,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         });
 
         countMowerPaths();
+        setMowerInfo();
 
     }
 
@@ -336,13 +361,19 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 currentPath = Integer.parseInt(snapshot.getValue().toString());
                 Log.i(TAG, "Current Path String: " + currentPath);
+
+                if(currentPath == 0){
+                    getUserLocation();
+                }
+
                 if (currentPath != 0) {
                     childCount = 1;
                     mMap.clear();
                     mowMarker = null;
                     chargingMarker = null;
+
                     setGPSPathCoordinates(currentPath);
-                    mowerMarker();
+                    //mowerMarker();
                     chargingMarker();
                     //Log.i(TAG, "Vertex Coordinates Array: Lat:" + vertexCoordinates.get(1).getLat()
                     //  + "     Lon:" + vertexCoordinates.get(1).getLon());
@@ -371,8 +402,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
                         switch(childCount) {
                             case 1:
-
                                 gpsReference.child("Current Charger Location").setValue(coordinate);
+                                mCharge = new LatLng(coordinate.getLat(),coordinate.getLon());
 
                             case 2:
                                 m1 = new LatLng(coordinate.getLat(),coordinate.getLon());
@@ -422,7 +453,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                             //this map will hold all coordinates generated from the algorithm
 
                             HashMap<String, LatLng> pathCoordinates = new HashMap<String, LatLng>();
-                            PolylineOptions mowPath = new PolylineOptions();
 
                             //for each different path chosen, clear the firebase node, reset the coord count,
                             //write the new path coordinates to the firebase and move the camera to the current path
@@ -433,16 +463,40 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                             //iterate through the arraylist of coordinates and fill the map with the coordinates
                             //map example (m1,lat-lng)
 
+                            PolylineOptions mowPath = new PolylineOptions();
+
+                            //use an array list to keep track of the amount of path points
+                            ArrayList mowPathArray = new ArrayList();
+                            ArrayList arrayLat = new ArrayList();
+                            ArrayList arrayLon = new ArrayList();
+
                             for (Coordinate s : pathAlgo) {
                                 ++coordCount;
                                 Log.i("PATH-FINDING","Path finding algorithm : LAT:  " + s.getLat() + "--------LON: "+ s.getLon());
                                 //add each coordinate point to the polyline path
                                 mowPath.add(new LatLng(s.getLat(),s.getLon())).width(4);
+                                mowPathArray.add(new LatLng(s.getLat(),s.getLon()));
+                                arrayLat.add(s.getLat());
+                                arrayLon.add(s.getLon());
                                 gpsReference.child("Path Coordinates").child(String.valueOf(coordCount)).setValue(s);
 
                             }
 
                             Log.i(TAG,"created path" +pathCoordinates);
+
+                            //add the charge point to the end of the mowpath
+                            mowPath.add(mCharge);
+                            mowPathArray.add(mCharge);
+
+                            Log.i("ARRAY LAT: ", arrayLat.toString());
+                            Log.i("ARRAY LON: ", arrayLon.toString());
+
+                            //add the charge point to the end of the firebase coordinates
+                            Coordinate vCharge = new Coordinate(mCharge.latitude,mCharge.longitude);
+                            gpsReference.child("Path Coordinates").child(String.valueOf(coordCount+1)).setValue(vCharge);
+
+                            //set the value of the amount of path points in the firebase
+                            gpsReference.child("Number of Path Coordinates").setValue(mowPathArray.size());
 
                             //insert the created polyline onto the map
                             Polyline polyline = mMap.addPolyline(mowPath);
@@ -498,15 +552,24 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private void mowerMarker(){
 
-        gpsReference.child("Current Mower Location").addValueEventListener(new ValueEventListener() {
+        gpsReference.child("CMW").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-
 
                 //obtain coordinate from firebase as latlng value
                 Coordinate mowerCoordinate = snapshot.getValue(Coordinate.class);
 
-                LatLng mowerLocation = new LatLng(mowerCoordinate.getLat(), mowerCoordinate.getLon());
+                String [] mowerCoord = snapshot.getValue().toString().split("@");
+                double mowerLat = Double.parseDouble(mowerCoord[0].substring(7));
+                double mowerLon = Double.parseDouble(mowerCoord[1].substring(0,mowerCoord[1].length()-1));
+                Log.i("MOWER COORD",mowerLat+"-----"+mowerLon);
+                //mowerCoord[0].replace("{coord=","");
+                //mowerCoord[1].replace("}","");
+                Log.i("MOWER COORD",mowerCoord[0]+"-----"+mowerCoord[1]);
+                //double mowerLat = Double.parseDouble(mowerCoord[0]);
+
+
+                mowerLocation = new LatLng(mowerLat, mowerLon);
 
                 //make mower icon marker smaller in size
                 BitmapDrawable bitmapDraw = (BitmapDrawable)getResources().getDrawable(R.drawable.mower_icon);
@@ -516,17 +579,17 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
                 //if there is no marker, add the marker to the app
                 if (mowMarker == null){
-                    mowMarkerOptions.position(mowerLocation);
+                    //mowMarkerOptions.position(mowerLocation);
                     mowMarker = mMap.addMarker(mowMarkerOptions);
                     //mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mowerLocation,17));
                 }
 
                 //once there is a marker
                 //set updated location, everytime the current mower location changes
+                //mowMarker.setRotation();
                 mowMarker.setPosition(mowerLocation);
                 //move camera on update
                 //mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mowerLocation,17));
-
 
             }
 
@@ -574,6 +637,69 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         });
     }
 
+    private void setMowerInfo(){
+
+        //Set textview values to firebase values
+        //Read the ATMega nodes in the firebase and set the values
+
+        ATMegaReference.child("BATTERY").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                batteryTV.setText(snapshot.getValue().toString());
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
+        ATMegaReference.child("COMPASS").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                compassTV.setText(snapshot.getValue().toString());
+
+                mowerRotation = Float.parseFloat(snapshot.getValue().toString());
+                //rotate mow marker on compass data change
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
+        ATMegaReference.child("CURRENT").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                currentTV.setText(snapshot.getValue().toString());
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
+        ATMegaReference.child("TEMPERATURE").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                tempTV.setText(snapshot.getValue().toString());
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
+
+
+
+
+    }
+
     private void setCurrentPath(String currentPath){
 
         userReference.child("Number of Paths").setValue(currentPath);
@@ -596,9 +722,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 }
             }.start();
         }
-
-
-
 
         for (Coordinate coordinate : pathAlgo) {
             final Handler handler = new Handler();
@@ -653,6 +776,41 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     public void onLowMemory() {
         super.onLowMemory();
         mMapView.onLowMemory();
+    }
+
+    private void getUserLocation() {
+        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
+
+        //check if user has permission set
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            fusedLocationProviderClient.getLastLocation().addOnSuccessListener(this, new OnSuccessListener<Location>() {
+                @Override
+                public void onSuccess(Location location) {
+                    Coordinate userLocation = new Coordinate(location.getLatitude(), location.getLongitude());
+                    gpsReference.child("Current User Location").setValue(userLocation);
+                }
+            });
+        }
+
+        //request permissions if user hasn't allowed yet
+        else {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_REQUEST_CODE);
+            }
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        if (requestCode == LOCATION_REQUEST_CODE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                getUserLocation();
+            } else {
+
+            }
+        }
     }
 
 
