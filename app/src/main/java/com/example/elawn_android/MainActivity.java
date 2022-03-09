@@ -22,6 +22,8 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
 
@@ -81,6 +83,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private SharedPreferencesHelper spHelper;
     private Spinner mainSpinner;
     ArrayList<Coordinate> pathAlgo = new ArrayList<Coordinate>();
+    private ImageButton settingsButton;
 
     private HashMap<String, Coordinate> vertexCoordinates = new HashMap<String, Coordinate>();
     //protected ArrayList<Coordinate> vertexCoordinates = new ArrayList<Coordinate>();
@@ -122,6 +125,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         signOutButton = findViewById(R.id.signOutButton);
         mapsButton = findViewById(R.id.mapsButton);
+        settingsButton = findViewById(R.id.settingsButton);
         powerButton = findViewById(R.id.powerButton);
         chargeButton = findViewById(R.id.chargeButton);
         compassTV = findViewById(R.id.compassTV);
@@ -159,6 +163,13 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             @Override
             public void onClick(View v) {
                 goToMapsActivity();
+            }
+        });
+
+        settingsButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                goToSettingsActivity();
             }
         });
 
@@ -329,6 +340,13 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             //no one is logged in
             goToLoginActivity();
         }
+    }
+
+
+    private void goToSettingsActivity() {
+        Intent intent = new Intent (this,SettingsActivity.class);
+        startActivity(intent);
+        finish();
     }
 
     private void goToLoginActivity() {
@@ -811,6 +829,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
             }
         }
+    }
+
+    @Override
+    public void onBackPressed() {
+        return;
     }
 
 

@@ -4,11 +4,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".LauncherActivity">
-
-    <com.cuberto.liquid_swipe.LiquidPager
-        android:id="@+id/pager"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+    tools:context=".SettingsActivity">
 
 </androidx.constraintlayout.widget.ConstraintLayout>
