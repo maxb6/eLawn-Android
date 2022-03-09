@@ -4,21 +4,29 @@
     <option name="filePathToZoomLevelMap">
       <map>
         <entry key="..\:/Users/maxbu/AndroidStudioProjects/eLawnAndroid2/app/src/main/res/drawable-v24/ic_launcher_foreground.xml" value="0.2595" />
+        <entry key="..\:/Users/maxbu/AndroidStudioProjects/eLawnAndroid2/app/src/main/res/drawable/arrow_white.xml" value="0.1845" />
         <entry key="..\:/Users/maxbu/AndroidStudioProjects/eLawnAndroid2/app/src/main/res/drawable/charging_icon_foreground.xml" value="0.1915" />
         <entry key="..\:/Users/maxbu/AndroidStudioProjects/eLawnAndroid2/app/src/main/res/drawable/clear_button.xml" value="0.2703125" />
         <entry key="..\:/Users/maxbu/AndroidStudioProjects/eLawnAndroid2/app/src/main/res/drawable/ic_baseline_battery_charging_full_24.xml" value="0.2595" />
         <entry key="..\:/Users/maxbu/AndroidStudioProjects/eLawnAndroid2/app/src/main/res/drawable/reactive_button.xml" value="0.2703125" />
+        <entry key="..\:/Users/maxbu/AndroidStudioProjects/eLawnAndroid2/app/src/main/res/drawable/settings_icon.xml" value="0.167" />
         <entry key="..\:/Users/maxbu/AndroidStudioProjects/eLawnAndroid2/app/src/main/res/drawable/shadow_button.xml" value="0.2703125" />
         <entry key="..\:/Users/maxbu/AndroidStudioProjects/eLawnAndroid2/app/src/main/res/layout/activity_auto.xml" value="0.24010416666666667" />
+        <entry key="..\:/Users/maxbu/AndroidStudioProjects/eLawnAndroid2/app/src/main/res/layout/activity_launcher.xml" value="0.25416666666666665" />
         <entry key="..\:/Users/maxbu/AndroidStudioProjects/eLawnAndroid2/app/src/main/res/layout/activity_login.xml" value="0.264" />
         <entry key="..\:/Users/maxbu/AndroidStudioProjects/eLawnAndroid2/app/src/main/res/layout/activity_main.xml" value="0.264" />
         <entry key="..\:/Users/maxbu/AndroidStudioProjects/eLawnAndroid2/app/src/main/res/layout/activity_manual.xml" value="0.25416666666666665" />
         <entry key="..\:/Users/maxbu/AndroidStudioProjects/eLawnAndroid2/app/src/main/res/layout/activity_maps.xml" value="0.15833333333333333" />
         <entry key="..\:/Users/maxbu/AndroidStudioProjects/eLawnAndroid2/app/src/main/res/layout/activity_mode.xml" value="0.25416666666666665" />
+        <entry key="..\:/Users/maxbu/AndroidStudioProjects/eLawnAndroid2/app/src/main/res/layout/activity_onboarding.xml" value="0.22447916666666667" />
         <entry key="..\:/Users/maxbu/AndroidStudioProjects/eLawnAndroid2/app/src/main/res/layout/activity_password.xml" value="0.4" />
         <entry key="..\:/Users/maxbu/AndroidStudioProjects/eLawnAndroid2/app/src/main/res/layout/activity_password2.xml" value="0.13020833333333334" />
         <entry key="..\:/Users/maxbu/AndroidStudioProjects/eLawnAndroid2/app/src/main/res/layout/activity_register.xml" value="0.536" />
+        <entry key="..\:/Users/maxbu/AndroidStudioProjects/eLawnAndroid2/app/src/main/res/layout/activity_settings.xml" value="0.1578125" />
         <entry key="..\:/Users/maxbu/AndroidStudioProjects/eLawnAndroid2/app/src/main/res/layout/fragment_maps.xml" value="0.1" />
+        <entry key="..\:/Users/maxbu/AndroidStudioProjects/eLawnAndroid2/app/src/main/res/layout/fragment_on_boarding1.xml" value="0.25416666666666665" />
+        <entry key="..\:/Users/maxbu/AndroidStudioProjects/eLawnAndroid2/app/src/main/res/layout/fragment_on_boarding2.xml" value="0.25416666666666665" />
+        <entry key="..\:/Users/maxbu/AndroidStudioProjects/eLawnAndroid2/app/src/main/res/layout/fragment_on_boarding3.xml" value="0.2" />
       </map>
     </option>
   </component>
