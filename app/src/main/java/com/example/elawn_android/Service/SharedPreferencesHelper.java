@@ -1,4 +1,4 @@
-package com.example.elawn_android;
+package com.example.elawn_android.Service;
 import android.content.Context;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -53,5 +53,17 @@ public class SharedPreferencesHelper {
         return sharedPreferences.getString("next_path_number", null);
 
     }
+
+    public void setNotification(Boolean control){
+        SharedPreferences.Editor edt = sharedPreferences.edit();
+        edt.putBoolean("notif_control", control);
+        edt.commit();
+    }
+
+    public Boolean getNotification(){
+        return sharedPreferences.getBoolean("notif_control",true);
+    }
+
+
 
 }

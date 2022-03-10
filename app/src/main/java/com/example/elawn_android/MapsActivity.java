@@ -6,17 +6,27 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentActivity;
 
 import android.Manifest;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
-import android.graphics.drawable.VectorDrawable;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
+import android.widget.EditText;
 import android.widget.Toast;
 
+import com.example.elawn_android.Database.DatabaseHelper;
+import com.example.elawn_android.Service.Coordinate;
+import com.example.elawn_android.Service.Path;
+import com.example.elawn_android.Service.PathFinding;
+import com.example.elawn_android.Service.SharedPreferencesHelper;
 import com.example.elawn_android.databinding.ActivityMapsBinding;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
@@ -40,8 +50,11 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, GoogleMap.OnMarkerClickListener, GoogleMap.OnMarkerDragListener, GoogleMap.OnInfoWindowClickListener {
 
@@ -51,13 +64,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private Marker vertexMarker;
     private int markerCount;
     private int coordCount = 0;
-    private static String TAG = "pathAlgo";
+    private static String TAG = "maps";
     private static DatabaseReference pathReference;
     private static DatabaseReference perimeterReference;
     private static DatabaseReference gpsReference;
     private static DatabaseReference userReference;
 
     private SharedPreferencesHelper spHelper;
+    private DatabaseHelper dbHelper;
 
     private String pathNumber;
     private String currentPath = "4";
@@ -75,6 +89,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private Coordinate v3 = new Coordinate();
     private Coordinate v4 = new Coordinate();
     private Coordinate vCharge = new Coordinate();
+    private Geocoder geocoder;
 
 
     private PolylineOptions mowPath = new PolylineOptions();
@@ -89,6 +104,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         super.onCreate(savedInstanceState);
 
         spHelper = new SharedPreferencesHelper(this);
+        dbHelper = new DatabaseHelper(this);
+
+        geocoder = new Geocoder(this, Locale.getDefault());
 
         pathReference = FirebaseDatabase.getInstance().getReference("Users")
                 .child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child("Mower Paths");
@@ -265,10 +283,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 spHelper.setPathNumber("1");
             }
 
+            /*
             pathReference.child(nextPathNumber).child("V1").setValue(v1);
             pathReference.child(nextPathNumber).child("V2").setValue(v2);
             pathReference.child(nextPathNumber).child("V3").setValue(v3);
             pathReference.child(nextPathNumber).child("V4").setValue(v4);
+
+             */
 
 
             PolygonOptions mowArea = new PolygonOptions()
@@ -318,7 +339,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             //write the charging point to firebase
             vCharge.setLat(chargeMarker.getPosition().latitude);
             vCharge.setLon(chargeMarker.getPosition().longitude);
-            pathReference.child(nextPathNumber).child("Charge Point").setValue(vCharge);
+            //pathReference.child(nextPathNumber).child("Charge Point").setValue(vCharge);
 
             //add the charging point to the end of the mow path
             mowPath.add(new LatLng(vCharge.getLat(), vCharge.getLon()));
@@ -326,11 +347,74 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             //insert the created polyline onto the map
             Polyline polyline = mMap.addPolyline(mowPath);
 
+            List<Address> addresses;
+
+            try {
+                addresses = geocoder.getFromLocation(vCharge.getLat(), vCharge.getLon(),1);
+                String address = addresses.get(0).getAddressLine(0);
+                Log.i("GEO LOCATION SUCCESS",address);
+                userInputPathName(address);
+
+            } catch (IOException e) {
+                e.printStackTrace();
+                Log.i("GEO LOCATION FAILED","");
+            }
+
+
         }
 
         //Toast.makeText(this, "Marker Count: "+ String.valueOf(markerCount), Toast.LENGTH_SHORT).show();
         //iterate marker count for each time a window is clicked
         markerCount++;
+    }
+
+    private void userInputPathName(String pathAddress){
+
+        //ask user for pathName, save path to database, return user to home
+        EditText pathName = new EditText(this);
+        AlertDialog.Builder alert = new AlertDialog.Builder(this);
+
+        alert.setTitle("Enter your path name");
+
+        // Set an EditText view to get user input
+
+        alert.setView(pathName);
+
+        alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int whichButton) {
+                String pathNameInput = pathName.getText().toString();
+                //Create new path with inserted information
+                //insert path into the database, get the generated path id, then insert the path into the firebase
+                Path newPath = new Path(-1,pathNameInput,pathAddress);
+                dbHelper.insertPath(newPath);
+                int pathId = dbHelper.getRecentPathId();
+
+                pathReference.child(String.valueOf(pathId)).child("V1").setValue(v1);
+                pathReference.child(String.valueOf(pathId)).child("V2").setValue(v2);
+                pathReference.child(String.valueOf(pathId)).child("V3").setValue(v3);
+                pathReference.child(String.valueOf(pathId)).child("V4").setValue(v4);
+                pathReference.child(String.valueOf(pathId)).child("Charge Point").setValue(vCharge);
+
+                goToMainActivity();
+
+
+            }
+        });
+
+        alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int whichButton) {
+                // Canceled.
+            }
+        });
+
+        alert.show();
+
+
+    }
+
+    private void goToMainActivity() {
+        Intent intent = new Intent (this,MainActivity2.class);
+        startActivity(intent);
     }
 
     private void getUserLocation() {

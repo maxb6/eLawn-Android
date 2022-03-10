@@ -10,6 +10,7 @@
     <color name="blue">#165FDD</color>
     <color name="lightGrey">#9E9FA1</color>
     <color name="chargeOrange">#EB9808</color>
+    <color name="transparent_silver">#33C0C0C0</color>
 
 
 </resources>
