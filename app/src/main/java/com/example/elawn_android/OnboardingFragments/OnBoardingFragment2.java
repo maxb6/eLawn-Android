@@ -1,4 +1,4 @@
-package com.example.elawn_android;
+package com.example.elawn_android.OnboardingFragments;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -14,6 +14,9 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import com.example.elawn_android.LoginActivity;
+import com.example.elawn_android.R;
 
 public class OnBoardingFragment2 extends Fragment {
 
@@ -53,7 +56,7 @@ public class OnBoardingFragment2 extends Fragment {
     }
 
     protected void goToLoginActivity(){
-        Intent intent = new Intent (getActivity(),LoginActivity.class);
+        Intent intent = new Intent (getActivity(), LoginActivity.class);
         startActivity(intent);
     }
 }

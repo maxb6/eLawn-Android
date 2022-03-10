@@ -12,8 +12,12 @@ import android.content.Intent;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
-import android.os.CountDownTimer;
 import android.util.Log;
+
+import com.example.elawn_android.OnboardingFragments.OnBoardingFragment1;
+import com.example.elawn_android.OnboardingFragments.OnBoardingFragment2;
+import com.example.elawn_android.OnboardingFragments.OnBoardingFragment3;
+import com.example.elawn_android.Service.SharedPreferencesHelper;
 
 
 public class LauncherActivity extends AppCompatActivity {
@@ -88,7 +92,7 @@ public class LauncherActivity extends AppCompatActivity {
 
 
     protected void goToMainActivity(){
-        Intent intent = new Intent (this,MainActivity.class);
+        Intent intent = new Intent (this,MainActivity2.class);
         startActivity(intent);
     }
 

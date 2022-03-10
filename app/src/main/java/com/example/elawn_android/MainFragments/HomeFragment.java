@@ -1,24 +1,29 @@
-package com.example.elawn_android;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
+package com.example.elawn_android.MainFragments;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.location.Location;
 import android.os.Bundle;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import androidx.fragment.app.Fragment;
+
 import android.os.CountDownTimer;
 import android.os.Handler;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -26,15 +31,22 @@ import android.widget.ImageButton;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.example.elawn_android.Database.DatabaseHelper;
+import com.example.elawn_android.LoginActivity;
+import com.example.elawn_android.MapsActivity;
+import com.example.elawn_android.ModeActivity;
+import com.example.elawn_android.R;
 import com.example.elawn_android.Service.Coordinate;
 import com.example.elawn_android.Service.PathFinding;
 import com.example.elawn_android.Service.SharedPreferencesHelper;
+import com.example.elawn_android.SettingsActivity;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
@@ -45,7 +57,6 @@ import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -56,9 +67,8 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class MainActivity extends AppCompatActivity implements OnMapReadyCallback {
+public class HomeFragment extends Fragment implements OnMapReadyCallback {
 
-    private static final int LOCATION_REQUEST_CODE = 99;
     private GoogleMap mMap;
     private MarkerOptions mowMarkerOptions = new MarkerOptions();
     private Marker mowMarker;
@@ -84,6 +94,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private Spinner mainSpinner;
     ArrayList<Coordinate> pathAlgo = new ArrayList<Coordinate>();
     private ImageButton settingsButton;
+    private View view;
 
     private HashMap<String, Coordinate> vertexCoordinates = new HashMap<String, Coordinate>();
     //protected ArrayList<Coordinate> vertexCoordinates = new ArrayList<Coordinate>();
@@ -111,29 +122,30 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private DatabaseReference pathReference;
     private DatabaseReference ATMegaReference;
 
-    FusedLocationProviderClient fusedLocationProviderClient;
+    private DatabaseHelper dbHelper;
 
-
-    private static final String MAPVIEW_BUNDLE_KEY = "MapViewBundleKey";
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        ViewGroup root = (ViewGroup)inflater.inflate(R.layout.fragment_home, container, false);
 
-        spHelper = new SharedPreferencesHelper(this);
+        view =  inflater.inflate(R.layout.fragment_home, container, false);
 
-        signOutButton = findViewById(R.id.signOutButton);
-        mapsButton = findViewById(R.id.mapsButton);
-        settingsButton = findViewById(R.id.settingsButton);
-        powerButton = findViewById(R.id.powerButton);
-        chargeButton = findViewById(R.id.chargeButton);
-        compassTV = findViewById(R.id.compassTV);
-        batteryTV = findViewById(R.id.batteryTV);
-        currentTV = findViewById(R.id.currentTV);
-        tempTV = findViewById(R.id.tempTV);
-        statusTV = findViewById(R.id.statusTV);
-        mainSpinner = findViewById(R.id.mainSpinner);
+
+        spHelper = new SharedPreferencesHelper(getActivity());
+
+        signOutButton = root.findViewById(R.id.signOutButton);
+        mapsButton = root.findViewById(R.id.mapsButton);
+        settingsButton = root.findViewById(R.id.settingsButton);
+        powerButton = root.findViewById(R.id.powerButton);
+        chargeButton = root.findViewById(R.id.chargeButton);
+        compassTV = root.findViewById(R.id.compassTV);
+        batteryTV = root.findViewById(R.id.batteryTV);
+        currentTV = root.findViewById(R.id.currentTV);
+        tempTV = root.findViewById(R.id.tempTV);
+        statusTV = root.findViewById(R.id.statusTV);
+        mainSpinner = root.findViewById(R.id.mainSpinner);
 
         //get current path from firebase
         userReference = FirebaseDatabase.getInstance().getReference("Users")
@@ -149,6 +161,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         ATMegaReference = FirebaseDatabase.getInstance().getReference("ATMega");
 
         mAuth = FirebaseAuth.getInstance();
+
+        dbHelper = new DatabaseHelper(getActivity());
 
         signOutButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -166,53 +180,19 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
         });
 
-        settingsButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                goToSettingsActivity();
-            }
-        });
-
         //spinner code --------------------------------------------------------------------------
         ArrayList<String> spinnerOptions = new ArrayList<>();
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, spinnerOptions);
+        spinnerOptions = dbHelper.getAllPathNames();
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_spinner_dropdown_item, spinnerOptions);
         //set the spinners adapter to the previously created one.
         mainSpinner.setAdapter(adapter);
-
-        //Read paths in database and place path options in spinner
-        pathReference.addChildEventListener(new ChildEventListener() {
-            @Override
-            public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-                spinnerOptions.add("Path "+ snapshot.getKey());
-                adapter.notifyDataSetChanged();
-            }
-
-            @Override
-            public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-
-            }
-
-            @Override
-            public void onChildRemoved(@NonNull DataSnapshot snapshot) {
-
-            }
-
-            @Override
-            public void onChildMoved(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        });
 
         //get path number from selected path spinner
         mainSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                currentPath = Integer.parseInt(mainSpinner.getSelectedItem().toString().substring(5));
+                currentPath = dbHelper.getPathIdFromName(mainSpinner.getSelectedItem().toString());
+                Log.i("current path", ""+currentPath);
                 //Log.i("Current Path","Current Path: "+ currentPath);
                 //set current path in firebase
                 userReference.child("Current Path").setValue(currentPath);
@@ -231,8 +211,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             mapViewBundle = savedInstanceState.getBundle(MAP_VIEW_BUNDLE_KEY);
         }
 
-        mMapView = (MapView) findViewById(R.id.mapView);
-        mMapView.onCreate(mapViewBundle);
+        mMapView = (MapView) root.findViewById(R.id.mapView);
+        mMapView.onCreate(savedInstanceState);
+        mMapView.onResume();
         mMapView.getMapAsync(this);
 
         //Change status text view and power button dependent on mode
@@ -274,7 +255,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     }
 
                     else if(currentStatus.equals("Mowing")){
-                        statusTV.setTextColor(Color.GREEN);
+                        statusTV.setTextColor(Color.BLUE);
                         powerButton.setText("TURN OFF");
                         powerButton.setOnClickListener(new View.OnClickListener() {
                             @Override
@@ -293,7 +274,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
                     else if(currentStatus.equals("Charging")){
                         powerButton.setText("TURN ON");
-                        statusTV.setTextColor(ContextCompat.getColor(getApplicationContext(),R.color.chargeOrange));
+                        statusTV.setTextColor(Color.GREEN);
                         powerButton.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
@@ -325,43 +306,27 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         countMowerPaths();
         setMowerInfo();
 
+
+        return root;
     }
-
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        mMapView.onStart();
-
-        FirebaseUser mFirebaseUser = mAuth.getCurrentUser();
-        if(mFirebaseUser != null){
-            //there is some user logged in
-        }else{
-            //no one is logged in
-            goToLoginActivity();
-        }
-    }
-
 
     private void goToSettingsActivity() {
-        Intent intent = new Intent (this,SettingsActivity.class);
+        Intent intent = new Intent (getActivity(), SettingsActivity.class);
         startActivity(intent);
-        finish();
     }
 
     private void goToLoginActivity() {
-        Intent intent = new Intent (this,LoginActivity.class);
+        Intent intent = new Intent (getActivity(), LoginActivity.class);
         startActivity(intent);
-        finish();
     }
 
     private void goToMapsActivity(){
-        Intent intent = new Intent (this,MapsActivity.class);
+        Intent intent = new Intent (getActivity(), MapsActivity.class);
         startActivity(intent);
     }
 
     private void goToModeActivity(){
-        Intent intent = new Intent (this,ModeActivity.class);
+        Intent intent = new Intent (getActivity(), ModeActivity.class);
         startActivity(intent);
     }
 
@@ -380,10 +345,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 currentPath = Integer.parseInt(snapshot.getValue().toString());
                 Log.i(TAG, "Current Path String: " + currentPath);
 
-                if(currentPath == 0){
-                    getUserLocation();
-                }
-
                 if (currentPath != 0) {
                     childCount = 1;
                     mMap.clear();
@@ -392,7 +353,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
                     setGPSPathCoordinates(currentPath);
                     //mowerMarker();
-                    chargingMarker();
+                    //chargingMarker();
                     //Log.i(TAG, "Vertex Coordinates Array: Lat:" + vertexCoordinates.get(1).getLat()
                     //  + "     Lon:" + vertexCoordinates.get(1).getLon());
                 }
@@ -522,6 +483,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
                         //vertexCoordinates.put(String.valueOf(childCount),coordinate);
                         vCoordinates.add(coordinate);
+                        chargingMarker();
                         childCount++;
                     }
 
@@ -630,11 +592,19 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
                 LatLng chargerLocation = new LatLng(chargerCoordinate.getLat(), chargerCoordinate.getLon());
 
-                //make mower icon marker smaller in size
-                BitmapDrawable bitmapDraw = (BitmapDrawable) getResources().getDrawable(R.drawable.charging_icon_blue);
+
+                BitmapDrawable bitmapDraw = (BitmapDrawable) view.getResources().getDrawable(R.drawable.charging_icon_blue);
                 Bitmap b = bitmapDraw.getBitmap();
                 Bitmap chargingIcon = Bitmap.createScaledBitmap(b, 100, 100, false);
+                //chargingMarkerOptions.icon(BitmapDescriptorFactory.fromBitmap(chargingIcon));
                 chargingMarkerOptions.icon(BitmapDescriptorFactory.fromBitmap(chargingIcon));
+
+
+                /*
+                byte [] chargingIconByteArray = getArguments().getByteArray("chargingIcon");
+                Bitmap chargingIcon = BitmapFactory.decodeByteArray(chargingIconByteArray,0,chargingIconByteArray.length);
+
+                */
 
                 //if there is no marker, add the marker to the app
                 if (chargingMarker == null) {
@@ -717,46 +687,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
 
     }
-
-    private void setCurrentPath(String currentPath){
-
-        userReference.child("Number of Paths").setValue(currentPath);
-        spHelper.setPathNumber(currentPath);
-
-    }
-
-    private void simulateMowerMovement() {
-
-
-        for (Coordinate coordinate : pathAlgo) {
-            new CountDownTimer(1000, 1000) {
-                @Override
-                public void onTick(long millisUntilFinished) {
-                    gpsReference.child("Current Mower Location").setValue(coordinate);
-                }
-
-                @Override
-                public void onFinish() {
-                }
-            }.start();
-        }
-
-        for (Coordinate coordinate : pathAlgo) {
-            final Handler handler = new Handler();
-            handler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    // Do something after amount of seconds below (each 1000 = 1s)
-                    // for (Coordinate coordinate : pathAlgo) {
-                    gpsReference.child("Current Mower Location").setValue(coordinate);
-                    // }
-                }
-            }, 1 * 1000);
-        }
-    }
-
-
-
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
@@ -769,72 +699,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         mMapView.onSaveInstanceState(mapViewBundle);
     }
-    @Override
-    protected void onResume() {
-        super.onResume();
-        mMapView.onResume();
-    }
 
-    @Override
-    protected void onStop() {
-        super.onStop();
-        mMapView.onStop();
-    }
-    @Override
-    protected void onPause() {
-        mMapView.onPause();
-        super.onPause();
-    }
-    @Override
-    protected void onDestroy() {
-        mMapView.onDestroy();
-        super.onDestroy();
-    }
     @Override
     public void onLowMemory() {
         super.onLowMemory();
         mMapView.onLowMemory();
     }
-
-    private void getUserLocation() {
-        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
-
-        //check if user has permission set
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            fusedLocationProviderClient.getLastLocation().addOnSuccessListener(this, new OnSuccessListener<Location>() {
-                @Override
-                public void onSuccess(Location location) {
-                    Coordinate userLocation = new Coordinate(location.getLatitude(), location.getLongitude());
-                    gpsReference.child("Current User Location").setValue(userLocation);
-                }
-            });
-        }
-
-        //request permissions if user hasn't allowed yet
-        else {
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_REQUEST_CODE);
-            }
-        }
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-
-        if (requestCode == LOCATION_REQUEST_CODE) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                getUserLocation();
-            } else {
-
-            }
-        }
-    }
-
-    @Override
-    public void onBackPressed() {
-        return;
-    }
-
 
 }
