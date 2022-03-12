@@ -1,25 +1,16 @@
 package com.example.elawn_android.MainFragments;
 
-import android.Manifest;
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
-import android.location.Location;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
-import android.os.CountDownTimer;
-import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -33,6 +24,7 @@ import android.widget.TextView;
 
 import com.example.elawn_android.Database.DatabaseHelper;
 import com.example.elawn_android.LoginActivity;
+import com.example.elawn_android.ManualActivity;
 import com.example.elawn_android.MapsActivity;
 import com.example.elawn_android.ModeActivity;
 import com.example.elawn_android.R;
@@ -40,13 +32,10 @@ import com.example.elawn_android.Service.Coordinate;
 import com.example.elawn_android.Service.PathFinding;
 import com.example.elawn_android.Service.SharedPreferencesHelper;
 import com.example.elawn_android.SettingsActivity;
-import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
@@ -55,7 +44,6 @@ import com.google.android.gms.maps.model.Polygon;
 import com.google.android.gms.maps.model.PolygonOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
@@ -77,16 +65,12 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
     private static final String TAG = "MainActivity";
     private static final String MAP_VIEW_BUNDLE_KEY = "MapViewBundleKey";
     private FirebaseAuth mAuth;
-    private Button loginPageButton;
-    private Button signOutButton;
-    private Button mapsButton;
+    private Button autoButton;
+    private Button manualButton;
+    private Button dynamicButton;
     private MapView mMapView;
     private Button powerButton;
     private Button chargeButton;
-    private TextView batteryTV;
-    private TextView compassTV;
-    private TextView currentTV;
-    private TextView tempTV;
     private TextView statusTV;
     private String currentStatus;
     protected int currentPath;
@@ -121,6 +105,8 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
     private DatabaseReference gpsReference;
     private DatabaseReference pathReference;
     private DatabaseReference ATMegaReference;
+    private DatabaseReference modeReference;
+
 
     private DatabaseHelper dbHelper;
 
@@ -135,15 +121,12 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
 
         spHelper = new SharedPreferencesHelper(getActivity());
 
-        signOutButton = root.findViewById(R.id.signOutButton);
-        mapsButton = root.findViewById(R.id.mapsButton);
-        settingsButton = root.findViewById(R.id.settingsButton);
         powerButton = root.findViewById(R.id.powerButton);
         chargeButton = root.findViewById(R.id.chargeButton);
-        compassTV = root.findViewById(R.id.compassTV);
-        batteryTV = root.findViewById(R.id.batteryTV);
-        currentTV = root.findViewById(R.id.currentTV);
-        tempTV = root.findViewById(R.id.tempTV);
+        autoButton = root.findViewById(R.id.auto_button);
+        manualButton = root.findViewById(R.id.manual_button);
+        dynamicButton = root.findViewById(R.id.dynamicButton);
+
         statusTV = root.findViewById(R.id.statusTV);
         mainSpinner = root.findViewById(R.id.mainSpinner);
 
@@ -158,27 +141,13 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
         pathReference = FirebaseDatabase.getInstance().getReference("Users")
                 .child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child("Mower Paths");
 
+        modeReference = FirebaseDatabase.getInstance().getReference("Control").child("Mode");
+
         ATMegaReference = FirebaseDatabase.getInstance().getReference("ATMega");
 
         mAuth = FirebaseAuth.getInstance();
 
         dbHelper = new DatabaseHelper(getActivity());
-
-        signOutButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mAuth.signOut();
-                spHelper.setUserLogIn(false);
-                goToLoginActivity();
-            }
-        });
-
-        mapsButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                goToMapsActivity();
-            }
-        });
 
         //spinner code --------------------------------------------------------------------------
         ArrayList<String> spinnerOptions = new ArrayList<>();
@@ -202,6 +171,54 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
                 currentPath = 0;
             }
         });
+
+        //manual and auto button, when mode=1 -> auto mode, when mode =2 -> manual mode
+
+       modeReference.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                int mode = Integer.parseInt(snapshot.getValue().toString());
+                if (mode == 2){
+                    manualButton.setBackgroundResource(R.drawable.white_button_clicked);
+                    autoButton.setBackgroundResource(R.drawable.white_button);
+                    manualMode();
+                }
+                else if (mode == 1){
+                    manualButton.setBackgroundResource(R.drawable.white_button);
+                    autoButton.setBackgroundResource(R.drawable.white_button_clicked);
+                    autoMode();
+                }
+                else {
+                    modeReference.setValue(2);
+                    manualButton.setBackgroundResource(R.drawable.white_button_clicked);
+                    autoButton.setBackgroundResource(R.drawable.white_button);
+                    manualMode();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) { }
+        });
+
+        manualButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                modeReference.setValue(2);
+                manualButton.setBackgroundResource(R.drawable.white_button_clicked);
+                autoButton.setBackgroundResource(R.drawable.white_button);
+                manualMode();
+            }
+        });
+        autoButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                modeReference.setValue(1);
+                manualButton.setBackgroundResource(R.drawable.white_button);
+                autoButton.setBackgroundResource(R.drawable.white_button_clicked);
+                autoMode();
+            }
+        });
+
 
 
         //mapView code ---------------------------------------------------------------------------
@@ -241,7 +258,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
                             @Override
                             public void onClick(View v) {
                                 //simulateMowerMovement();
-                                goToModeActivity();
+                                statusReference.setValue("Mowing");
                             }
                         });
 
@@ -278,7 +295,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
                         powerButton.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
-                                goToModeActivity();
+                                statusReference.setValue("Mowing");
                             }
                         });
 
@@ -304,16 +321,43 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
         });
 
         countMowerPaths();
-        setMowerInfo();
 
 
         return root;
     }
 
+    private void manualMode() {
+        dynamicButton.setText("CONTROLLER");
+        dynamicButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                goToControlActivity();
+            }
+        });
+    }
+
+    private void autoMode() {
+        dynamicButton.setText("CREATE PATH");
+        dynamicButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                goToMapsActivity();
+            }
+        });
+    }
+
+
+
     private void goToSettingsActivity() {
         Intent intent = new Intent (getActivity(), SettingsActivity.class);
         startActivity(intent);
     }
+
+    private void goToControlActivity() {
+        Intent intent = new Intent (getActivity(), ManualActivity.class);
+        startActivity(intent);
+    }
+
 
     private void goToLoginActivity() {
         Intent intent = new Intent (getActivity(), LoginActivity.class);
@@ -625,68 +669,6 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
         });
     }
 
-    private void setMowerInfo(){
-
-        //Set textview values to firebase values
-        //Read the ATMega nodes in the firebase and set the values
-
-        ATMegaReference.child("BATTERY").addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                batteryTV.setText(snapshot.getValue().toString());
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        });
-
-        ATMegaReference.child("COMPASS").addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                compassTV.setText(snapshot.getValue().toString());
-
-                mowerRotation = Float.parseFloat(snapshot.getValue().toString());
-                //rotate mow marker on compass data change
-
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        });
-
-        ATMegaReference.child("CURRENT").addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                currentTV.setText(snapshot.getValue().toString());
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        });
-
-        ATMegaReference.child("TEMPERATURE").addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                tempTV.setText(snapshot.getValue().toString());
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        });
-
-
-
-
-
-    }
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
