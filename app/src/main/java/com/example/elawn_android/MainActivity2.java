@@ -11,13 +11,11 @@ import androidx.fragment.app.FragmentTransaction;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
 import android.location.Location;
 import android.os.Bundle;
 
 import com.example.elawn_android.MainFragments.HomeFragment;
-import com.example.elawn_android.MainFragments.ProfileFragment;
+import com.example.elawn_android.MainFragments.MowerFragment;
 import com.example.elawn_android.MainFragments.SettingsFragment;
 import com.example.elawn_android.Service.Coordinate;
 import com.example.elawn_android.databinding.ActivityMain2Binding;
@@ -26,8 +24,6 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-
-import java.io.ByteArrayOutputStream;
 
 
 public class  MainActivity2 extends AppCompatActivity {
@@ -57,7 +53,7 @@ public class  MainActivity2 extends AppCompatActivity {
                     replaceFragment(new HomeFragment());
                     break;
                 case R.id.profile:
-                    replaceFragment(new ProfileFragment());
+                    replaceFragment(new MowerFragment());
                     break;
                 case R.id.settings:
                     replaceFragment(new SettingsFragment());

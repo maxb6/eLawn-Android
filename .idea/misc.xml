@@ -9,14 +9,19 @@
         <entry key="..\:/Users/maxbu/AndroidStudioProjects/eLawnAndroid2/app/src/main/res/drawable/arrow_white.xml" value="0.1845" />
         <entry key="..\:/Users/maxbu/AndroidStudioProjects/eLawnAndroid2/app/src/main/res/drawable/charging_icon_foreground.xml" value="0.1915" />
         <entry key="..\:/Users/maxbu/AndroidStudioProjects/eLawnAndroid2/app/src/main/res/drawable/clear_button.xml" value="0.2703125" />
+        <entry key="..\:/Users/maxbu/AndroidStudioProjects/eLawnAndroid2/app/src/main/res/drawable/clickable_button.xml" value="0.241" />
         <entry key="..\:/Users/maxbu/AndroidStudioProjects/eLawnAndroid2/app/src/main/res/drawable/custom_dialog.xml" value="0.21" />
         <entry key="..\:/Users/maxbu/AndroidStudioProjects/eLawnAndroid2/app/src/main/res/drawable/ic_baseline_battery_charging_full_24.xml" value="0.2595" />
+        <entry key="..\:/Users/maxbu/AndroidStudioProjects/eLawnAndroid2/app/src/main/res/drawable/ic_baseline_control_camera_24.xml" value="0.23" />
         <entry key="..\:/Users/maxbu/AndroidStudioProjects/eLawnAndroid2/app/src/main/res/drawable/ic_baseline_home_24.xml" value="0.1425" />
         <entry key="..\:/Users/maxbu/AndroidStudioProjects/eLawnAndroid2/app/src/main/res/drawable/ic_baseline_person_24.xml" value="0.1425" />
         <entry key="..\:/Users/maxbu/AndroidStudioProjects/eLawnAndroid2/app/src/main/res/drawable/ic_baseline_settings_24.xml" value="0.1425" />
+        <entry key="..\:/Users/maxbu/AndroidStudioProjects/eLawnAndroid2/app/src/main/res/drawable/ic_baseline_wifi_tethering_24.xml" value="0.23" />
         <entry key="..\:/Users/maxbu/AndroidStudioProjects/eLawnAndroid2/app/src/main/res/drawable/reactive_button.xml" value="0.2703125" />
         <entry key="..\:/Users/maxbu/AndroidStudioProjects/eLawnAndroid2/app/src/main/res/drawable/settings_icon.xml" value="0.167" />
         <entry key="..\:/Users/maxbu/AndroidStudioProjects/eLawnAndroid2/app/src/main/res/drawable/shadow_button.xml" value="0.2703125" />
+        <entry key="..\:/Users/maxbu/AndroidStudioProjects/eLawnAndroid2/app/src/main/res/drawable/white_button.xml" value="0.107" />
+        <entry key="..\:/Users/maxbu/AndroidStudioProjects/eLawnAndroid2/app/src/main/res/drawable/white_button_clicked.xml" value="0.173" />
         <entry key="..\:/Users/maxbu/AndroidStudioProjects/eLawnAndroid2/app/src/main/res/layout/activity_auto.xml" value="0.24010416666666667" />
         <entry key="..\:/Users/maxbu/AndroidStudioProjects/eLawnAndroid2/app/src/main/res/layout/activity_launcher.xml" value="0.25416666666666665" />
         <entry key="..\:/Users/maxbu/AndroidStudioProjects/eLawnAndroid2/app/src/main/res/layout/activity_login.xml" value="0.264" />
@@ -31,13 +36,14 @@
         <entry key="..\:/Users/maxbu/AndroidStudioProjects/eLawnAndroid2/app/src/main/res/layout/activity_register.xml" value="0.536" />
         <entry key="..\:/Users/maxbu/AndroidStudioProjects/eLawnAndroid2/app/src/main/res/layout/activity_settings.xml" value="0.1578125" />
         <entry key="..\:/Users/maxbu/AndroidStudioProjects/eLawnAndroid2/app/src/main/res/layout/curve_shape.xml" value="0.20260416666666667" />
-        <entry key="..\:/Users/maxbu/AndroidStudioProjects/eLawnAndroid2/app/src/main/res/layout/fragment_home.xml" value="0.264" />
+        <entry key="..\:/Users/maxbu/AndroidStudioProjects/eLawnAndroid2/app/src/main/res/layout/fragment_home.xml" value="0.2" />
         <entry key="..\:/Users/maxbu/AndroidStudioProjects/eLawnAndroid2/app/src/main/res/layout/fragment_maps.xml" value="0.1" />
+        <entry key="..\:/Users/maxbu/AndroidStudioProjects/eLawnAndroid2/app/src/main/res/layout/fragment_mower.xml" value="0.1" />
         <entry key="..\:/Users/maxbu/AndroidStudioProjects/eLawnAndroid2/app/src/main/res/layout/fragment_on_boarding1.xml" value="0.25416666666666665" />
         <entry key="..\:/Users/maxbu/AndroidStudioProjects/eLawnAndroid2/app/src/main/res/layout/fragment_on_boarding2.xml" value="0.25416666666666665" />
         <entry key="..\:/Users/maxbu/AndroidStudioProjects/eLawnAndroid2/app/src/main/res/layout/fragment_on_boarding3.xml" value="0.2" />
         <entry key="..\:/Users/maxbu/AndroidStudioProjects/eLawnAndroid2/app/src/main/res/layout/fragment_profile.xml" value="0.13229166666666667" />
-        <entry key="..\:/Users/maxbu/AndroidStudioProjects/eLawnAndroid2/app/src/main/res/layout/fragment_settings.xml" value="0.4" />
+        <entry key="..\:/Users/maxbu/AndroidStudioProjects/eLawnAndroid2/app/src/main/res/layout/fragment_settings.xml" value="0.264" />
         <entry key="..\:/Users/maxbu/AndroidStudioProjects/eLawnAndroid2/app/src/main/res/layout/path_item.xml" value="0.4" />
         <entry key="..\:/Users/maxbu/AndroidStudioProjects/eLawnAndroid2/app/src/main/res/menu/bottom_nav_menu.xml" value="0.13229166666666667" />
       </map>
