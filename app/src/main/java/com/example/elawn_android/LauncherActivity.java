@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentStatePagerAdapter;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.viewpager.widget.ViewPager;
 
 import android.content.Context;
@@ -22,8 +23,6 @@ import com.example.elawn_android.Service.SharedPreferencesHelper;
 
 public class LauncherActivity extends AppCompatActivity {
 
-    private ViewPager viewPager;
-    private ScreenSlidePagerAdapter pagerAdapter;
     private WifiManager wifiManager;
     private WifiInfo connection;
 
@@ -32,10 +31,6 @@ public class LauncherActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_launcher);
 
-        viewPager = findViewById(R.id.pager);
-        pagerAdapter = new ScreenSlidePagerAdapter(getSupportFragmentManager());
-        viewPager.setAdapter(pagerAdapter);
-
         //Read wifi information
         wifiManager = (WifiManager)getApplicationContext().getSystemService(Context.WIFI_SERVICE) ;
         connection = wifiManager.getConnectionInfo();
@@ -43,8 +38,8 @@ public class LauncherActivity extends AppCompatActivity {
 
         Log.i("wifi info",display);
 
-
-
+        //check if user is logged in and direct them to the appropriate activity
+        //check if its a new user
 
 
         SharedPreferencesHelper spHelper = new SharedPreferencesHelper(this);
@@ -53,41 +48,19 @@ public class LauncherActivity extends AppCompatActivity {
             goToMainActivity();
         }
         else{
-            goToLoginActivity();
+            if(spHelper.isNewUser()){
+                goToOnBoardingActivity();
+            }
+            else{
+                goToLoginActivity();
+            }
         }
-
 
     }
 
-    private class ScreenSlidePagerAdapter extends FragmentStatePagerAdapter {
-
-        private static final int NUM_PAGES = 3;
-
-        public ScreenSlidePagerAdapter(@NonNull FragmentManager fm) {
-            super(fm);
-        }
-
-        @NonNull
-        @Override
-        public Fragment getItem(int position) {
-            switch(position){
-                case 0:
-                    OnBoardingFragment1 tab1 = new OnBoardingFragment1();
-                    return tab1;
-                case 1:
-                    OnBoardingFragment2 tab2 = new OnBoardingFragment2();
-                    return tab2;
-                case 2:
-                    OnBoardingFragment3 tab3 = new OnBoardingFragment3();
-                    return tab3;
-            }
-            return null;
-        }
-
-        @Override
-        public int getCount() {
-            return NUM_PAGES;
-        }
+    private void goToOnBoardingActivity() {
+        Intent intent = new Intent (this,OnBoardingActivity.class);
+        startActivity(intent);
     }
 
 

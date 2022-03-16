@@ -31,7 +31,6 @@ import com.example.elawn_android.R;
 import com.example.elawn_android.Service.Coordinate;
 import com.example.elawn_android.Service.PathFinding;
 import com.example.elawn_android.Service.SharedPreferencesHelper;
-import com.example.elawn_android.SettingsActivity;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
@@ -55,6 +54,8 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import eo.view.batterymeter.BatteryMeter;
+
 public class HomeFragment extends Fragment implements OnMapReadyCallback {
 
     private GoogleMap mMap;
@@ -72,6 +73,8 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
     private Button powerButton;
     private Button chargeButton;
     private TextView statusTV;
+    private TextView batteryTV2;
+    private BatteryMeter batteryMeter2;
     private String currentStatus;
     protected int currentPath;
     private SharedPreferencesHelper spHelper;
@@ -121,11 +124,14 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
 
         spHelper = new SharedPreferencesHelper(getActivity());
 
+        batteryTV2 = root.findViewById(R.id.batteryTV2);
+        batteryMeter2 = root.findViewById(R.id.batteryMeter3);
+
         powerButton = root.findViewById(R.id.powerButton);
         chargeButton = root.findViewById(R.id.chargeButton);
         autoButton = root.findViewById(R.id.auto_button);
         manualButton = root.findViewById(R.id.manual_button);
-        dynamicButton = root.findViewById(R.id.dynamicButton);
+        //dynamicButton = root.findViewById(R.id.dynamicButton);
 
         statusTV = root.findViewById(R.id.statusTV);
         mainSpinner = root.findViewById(R.id.mainSpinner);
@@ -149,9 +155,14 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
 
         dbHelper = new DatabaseHelper(getActivity());
 
+        //get battery info
+        getBatteryLevel();
+
         //spinner code --------------------------------------------------------------------------
         ArrayList<String> spinnerOptions = new ArrayList<>();
-        spinnerOptions = dbHelper.getAllPathNames();
+        if(dbHelper.getAllPathNames()!=null) {
+            spinnerOptions = dbHelper.getAllPathNames();
+        }
         ArrayAdapter<String> adapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_spinner_dropdown_item, spinnerOptions);
         //set the spinners adapter to the previously created one.
         mainSpinner.setAdapter(adapter);
@@ -164,7 +175,10 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
                 Log.i("current path", ""+currentPath);
                 //Log.i("Current Path","Current Path: "+ currentPath);
                 //set current path in firebase
-                userReference.child("Current Path").setValue(currentPath);
+                if(currentPath!=0) {
+                    userReference.child("Current Path").setValue(currentPath);
+                }
+
             }
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
@@ -181,18 +195,18 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
                 if (mode == 2){
                     manualButton.setBackgroundResource(R.drawable.white_button_clicked);
                     autoButton.setBackgroundResource(R.drawable.white_button);
-                    manualMode();
+                    //manualMode();
                 }
                 else if (mode == 1){
                     manualButton.setBackgroundResource(R.drawable.white_button);
                     autoButton.setBackgroundResource(R.drawable.white_button_clicked);
-                    autoMode();
+                    //autoMode();
                 }
                 else {
                     modeReference.setValue(2);
                     manualButton.setBackgroundResource(R.drawable.white_button_clicked);
                     autoButton.setBackgroundResource(R.drawable.white_button);
-                    manualMode();
+                    //manualMode();
                 }
             }
 
@@ -206,7 +220,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
                 modeReference.setValue(2);
                 manualButton.setBackgroundResource(R.drawable.white_button_clicked);
                 autoButton.setBackgroundResource(R.drawable.white_button);
-                manualMode();
+                //manualMode();
             }
         });
         autoButton.setOnClickListener(new View.OnClickListener() {
@@ -215,7 +229,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
                 modeReference.setValue(1);
                 manualButton.setBackgroundResource(R.drawable.white_button);
                 autoButton.setBackgroundResource(R.drawable.white_button_clicked);
-                autoMode();
+                //autoMode();
             }
         });
 
@@ -346,12 +360,6 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
         });
     }
 
-
-
-    private void goToSettingsActivity() {
-        Intent intent = new Intent (getActivity(), SettingsActivity.class);
-        startActivity(intent);
-    }
 
     private void goToControlActivity() {
         Intent intent = new Intent (getActivity(), ManualActivity.class);
@@ -552,6 +560,24 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
                     }
                 });
 
+    }
+
+    private void getBatteryLevel(){
+
+        ATMegaReference.child("BATTERY").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                String batteryLevel = snapshot.getValue().toString();
+                batteryTV2.setText(batteryLevel+"%");
+                Log.i(TAG,snapshot.getValue().toString());
+                batteryMeter2.setChargeLevel(Integer.parseInt(batteryLevel));
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
     }
 
     private void countMowerPaths(){

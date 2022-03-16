@@ -7,6 +7,51 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
+    <eo.view.batterymeter.BatteryMeterView
+        android:id="@+id/batteryMeter3"
+        android:layout_width="82dp"
+        android:layout_height="46dp"
+        android:rotation="90"
+        app:batteryMeterChargingColor="#4caf50"
+        app:batteryMeterColor="#0277bd"
+        app:batteryMeterCriticalChargeLevel="15"
+        app:batteryMeterCriticalColor="#d84315"
+        app:batteryMeterIndicatorColor="@android:color/transparent"
+        app:batteryMeterTheme="rounded"
+        app:batteryMeterUnknownColor="#e0e0e0"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.003"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.08" />
+
+    <TextView
+        android:id="@+id/batteryTV2"
+        android:layout_width="104dp"
+        android:layout_height="37dp"
+        android:layout_marginEnd="176dp"
+        android:text="--%"
+        android:textSize="20sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toEndOf="@+id/batteryMeter"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.089" />
+
+    <ImageView
+        android:id="@+id/imageView4"
+        android:layout_width="149dp"
+        android:layout_height="75dp"
+        app:layout_constraintBottom_toTopOf="@+id/imageView"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.061"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.153"
+        app:srcCompat="@drawable/elawn_logo" />
+
     <Button
         android:id="@+id/powerButton"
         android:layout_width="177dp"
@@ -31,14 +76,13 @@
 
     <com.google.android.gms.maps.MapView
         android:id="@+id/mapView"
-        android:layout_width="313dp"
-        android:layout_height="341dp"
+        android:layout_width="322dp"
+        android:layout_height="343dp"
         android:layout_marginStart="47dp"
         android:layout_marginEnd="48dp"
-        android:layout_marginBottom="12dp"
+        android:layout_marginBottom="28dp"
         app:layout_constraintBottom_toTopOf="@+id/manual_button"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.48"
         app:layout_constraintStart_toStartOf="parent" />
 
     <TextView
@@ -47,10 +91,9 @@
         android:layout_height="28dp"
         android:layout_marginStart="99dp"
         android:layout_marginEnd="12dp"
-        android:layout_marginBottom="15dp"
         android:text="Status: "
         android:textSize="18sp"
-        app:layout_constraintBottom_toTopOf="@+id/powerButton"
+        app:layout_constraintBaseline_toBaselineOf="@+id/statusTV"
         app:layout_constraintEnd_toStartOf="@+id/statusTV"
         app:layout_constraintStart_toStartOf="parent" />
 
@@ -60,7 +103,7 @@
         android:layout_height="29dp"
         android:layout_marginStart="12dp"
         android:layout_marginEnd="88dp"
-        android:layout_marginBottom="19dp"
+        android:layout_marginBottom="10dp"
         android:text="OFF"
         android:textSize="22sp"
         app:layout_constraintBottom_toTopOf="@+id/chargeButton"
@@ -69,23 +112,21 @@
 
     <Spinner
         android:id="@+id/mainSpinner"
-        android:layout_width="198dp"
-        android:layout_height="28dp"
-        android:layout_marginStart="106dp"
-        android:layout_marginTop="10dp"
-        android:layout_marginEnd="107dp"
-        android:layout_marginBottom="10dp"
+        android:layout_width="203dp"
+        android:layout_height="43dp"
+        android:layout_marginTop="30dp"
+        android:layout_marginBottom="5dp"
         app:layout_constraintBottom_toTopOf="@+id/mapView"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.925" />
 
     <Button
         android:id="@+id/manual_button"
-        android:layout_width="170dp"
-        android:layout_height="70dp"
-        android:layout_marginEnd="6dp"
-        android:layout_marginBottom="15dp"
+        android:layout_width="162dp"
+        android:layout_height="52dp"
+        android:layout_marginEnd="12dp"
         android:height="60dp"
         android:background="@drawable/white_button"
         android:drawableLeft="@drawable/ic_baseline_control_camera_24"
@@ -94,17 +135,17 @@
         android:padding="6dp"
         android:text="Manual"
         android:textColor="#000"
-        app:layout_constraintBottom_toTopOf="@+id/dynamicButton"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.834" />
 
     <Button
         android:id="@+id/auto_button"
-        android:layout_width="170dp"
-        android:layout_height="70dp"
+        android:layout_width="164dp"
+        android:layout_height="52dp"
         android:layout_marginStart="6dp"
-        android:layout_marginTop="12dp"
         android:layout_marginEnd="6dp"
-        android:layout_marginBottom="15dp"
         android:height="60dp"
         android:background="@drawable/white_button"
         android:drawableLeft="@drawable/ic_baseline_wifi_tethering_24"
@@ -113,25 +154,9 @@
         android:padding="6dp"
         android:text="Autonomous"
         android:textColor="#000"
-        app:layout_constraintBottom_toTopOf="@+id/dynamicButton"
+        app:layout_constraintBaseline_toBaselineOf="@+id/manual_button"
         app:layout_constraintEnd_toStartOf="@+id/manual_button"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/mapView" />
-
-    <Button
-        android:id="@+id/dynamicButton"
-        android:layout_width="217dp"
-        android:layout_height="48dp"
-        android:layout_marginStart="97dp"
-        android:layout_marginEnd="97dp"
-        android:layout_marginBottom="12dp"
-        android:height="60dp"
-        android:background="@drawable/white_button"
-        android:padding="6dp"
-        android:text="DYNAMIC"
-        android:textColor="#000"
-        app:layout_constraintBottom_toTopOf="@+id/statusTV"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.441"
         app:layout_constraintStart_toStartOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

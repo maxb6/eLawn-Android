@@ -32,19 +32,6 @@ public class LoginActivity extends AppCompatActivity {
 
     private SharedPreferencesHelper spHelper;
 
-    /*//check if user is signed in
-    @Override
-    public void onStart() {
-        super.onStart();
-        // Check if user is signed in (non-null) and update UI accordingly.
-        FirebaseUser currentUser = mAuth.getCurrentUser();
-        if(currentUser != null){
-            goToMainActivity();
-        }
-    }
-
-     */
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -59,6 +46,8 @@ public class LoginActivity extends AppCompatActivity {
 
         spHelper = new SharedPreferencesHelper(getApplicationContext());
         mAuth = FirebaseAuth.getInstance();
+
+
 
         loginProgressBar.setVisibility(View.GONE);
 

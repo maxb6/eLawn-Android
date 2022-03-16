@@ -2,6 +2,7 @@ package com.example.elawn_android.MainFragments;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -14,11 +15,16 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.Switch;
 import android.widget.Toast;
 
 import com.example.elawn_android.Database.DatabaseHelper;
+import com.example.elawn_android.LauncherActivity;
+import com.example.elawn_android.MapsActivity;
+import com.example.elawn_android.OnBoardingActivity;
 import com.example.elawn_android.R;
 import com.example.elawn_android.Service.Path;
 import com.example.elawn_android.Service.PathAdapter;
@@ -50,7 +56,8 @@ public class SettingsFragment extends Fragment {
     private DatabaseHelper dbHelper;
     private static DatabaseReference pathReference;
 
-    private ImageButton deletePathButton;
+    private Button mapsButton;
+    private ImageView questionMark;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -60,6 +67,9 @@ public class SettingsFragment extends Fragment {
 
         spHelper = new SharedPreferencesHelper(getActivity());
         dbHelper = new DatabaseHelper(getActivity());
+
+        mapsButton = root.findViewById(R.id.mapsButton2);
+        questionMark = root.findViewById(R.id.questionMark);
 
         pathReference = FirebaseDatabase.getInstance().getReference("Users")
                 .child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child("Mower Paths");
@@ -75,7 +85,27 @@ public class SettingsFragment extends Fragment {
         setNotificationSwitchValue();
         loadPaths();
 
+        questionMark.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(getActivity(), "Swipe to delete your path in the Path Manager", Toast.LENGTH_LONG).show();
+            }
+        });
 
+        mapsButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                goToMapsActivity();
+            }
+        });
+
+        Button button = root.findViewById(R.id.button);
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                goToOnBoardingActivity();
+            }
+        });
 
         // Inflate the layout for this fragment
         return root;
@@ -193,6 +223,21 @@ public class SettingsFragment extends Fragment {
                     .setNegativeButton("No", dialogClickListener).show();
         }
     };
+
+    private void goToLauncherActivity() {
+        Intent intent = new Intent (getActivity(), LauncherActivity.class);
+        startActivity(intent);
+    }
+
+    private void goToOnBoardingActivity() {
+        Intent intent = new Intent (getActivity(), OnBoardingActivity.class);
+        startActivity(intent);
+    }
+
+    private void goToMapsActivity() {
+        Intent intent = new Intent (getActivity(), MapsActivity.class);
+        startActivity(intent);
+    }
 
 
 }

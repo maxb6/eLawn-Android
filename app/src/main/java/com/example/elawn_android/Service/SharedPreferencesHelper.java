@@ -21,6 +21,17 @@ public class SharedPreferencesHelper {
         return sharedPreferences.getBoolean("activity_executed", false);
     }
 
+    public void setNewUser(Boolean newUser) {
+        SharedPreferences.Editor edt = sharedPreferences.edit();
+        edt.putBoolean("new_user", newUser);
+        edt.commit();
+    }
+
+    public Boolean isNewUser() {
+        return sharedPreferences.getBoolean("new_user", true);
+    }
+
+
     public void setCurrentPath(int currentPath) {
         SharedPreferences.Editor edt = sharedPreferences.edit();
         edt.putInt("current_path", currentPath);
@@ -42,6 +53,19 @@ public class SharedPreferencesHelper {
         return sharedPreferences.getString("path_number", null);
 
     }
+
+    public void setBatteryLevel(Float batteryLevel) {
+        SharedPreferences.Editor edt = sharedPreferences.edit();
+        edt.putFloat("battery_level", batteryLevel);
+        edt.commit();
+    }
+
+    public Float getBatteryLevel() {
+        return sharedPreferences.getFloat("battery_level", 0);
+
+    }
+
+
 
     public void setNextPathNumber(String pathNumber) {
         SharedPreferences.Editor edt = sharedPreferences.edit();

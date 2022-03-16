@@ -13,12 +13,15 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.example.elawn_android.LoginActivity;
+import com.example.elawn_android.MainActivity2;
 import com.example.elawn_android.R;
+import com.example.elawn_android.Service.SharedPreferencesHelper;
 
 public class OnBoardingFragment1 extends Fragment {
 
 
     private TextView skipButton;
+    private SharedPreferencesHelper spHelper;
 
     @Nullable
     @Override
@@ -30,11 +33,22 @@ public class OnBoardingFragment1 extends Fragment {
         skipButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                goToLoginActivity();
+                if(spHelper.isUserLoggedIn()){
+                    goToMainActivity();
+                }
+                else{
+                    goToLoginActivity();
+                }
             }
         });
 
         return root;
+    }
+
+    private void goToMainActivity() {
+        Intent intent = new Intent (getActivity(), MainActivity2.class);
+        //intent.putExtra("frgToLoad", SETTINGS_FRAGMENT);
+        startActivity(intent);
     }
 
     protected void goToLoginActivity(){
