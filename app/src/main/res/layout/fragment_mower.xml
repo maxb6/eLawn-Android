@@ -8,149 +8,222 @@
     tools:context=".MainActivity">
 
     <TextView
-        android:id="@+id/compassTV"
-        android:layout_width="155dp"
-        android:layout_height="23dp"
-        android:text="76"
+        android:id="@+id/location"
+        android:layout_width="120dp"
+        android:layout_height="37dp"
+        android:fontFamily="@font/amiko_bold"
+        android:text="Location"
         android:textAlignment="center"
         android:textSize="20sp"
-        tools:layout_editor_absoluteX="226dp"
-        tools:layout_editor_absoluteY="399dp" />
+        android:translationZ="90dp"
+        app:layout_constraintBottom_toBottomOf="@+id/button2"
+        app:layout_constraintEnd_toStartOf="@+id/locationTV"
+        app:layout_constraintHorizontal_bias="0.772"
+        app:layout_constraintStart_toStartOf="@+id/button2"
+        app:layout_constraintTop_toTopOf="@+id/button2" />
+
+    <TextView
+        android:id="@+id/locationTV"
+        android:translationZ="90dp"
+        android:layout_width="198dp"
+        android:layout_height="60dp"
+        android:layout_marginEnd="4dp"
+        android:text="76"
+        android:textAlignment="center"
+        android:textSize="14sp"
+        app:layout_constraintBottom_toBottomOf="@+id/button2"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/imageView"
+        app:layout_constraintVertical_bias="0.571" />
+
 
     <TextView
         android:id="@+id/temperature"
-        android:layout_width="164dp"
-        android:layout_height="33dp"
+        android:layout_width="172dp"
+        android:layout_height="44dp"
+        android:fontFamily="@font/amiko_bold"
         android:text="Temperature"
         android:textAlignment="center"
-        android:textSize="24sp"
-        tools:layout_editor_absoluteX="223dp"
-        tools:layout_editor_absoluteY="434dp" />
-
-    <Button
-        android:id="@+id/batteryButton3"
-        android:layout_width="173dp"
-        android:layout_height="78dp"
-        android:background="@drawable/clear_button"
-        tools:layout_editor_absoluteX="218dp"
-        tools:layout_editor_absoluteY="423dp" />
+        android:textSize="20sp"
+        android:translationZ="90dp"
+        app:layout_constraintBaseline_toBaselineOf="@+id/tempTV"
+        app:layout_constraintEnd_toStartOf="@+id/tempTV"
+        app:layout_constraintHorizontal_bias="0.659"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <TextView
         android:id="@+id/tempTV"
         android:layout_width="163dp"
-        android:layout_height="26dp"
+        android:layout_height="32dp"
+        android:layout_marginTop="24dp"
+        android:layout_marginEnd="32dp"
         android:text="4"
         android:textAlignment="center"
         android:textSize="20sp"
-        tools:layout_editor_absoluteX="223dp"
-        tools:layout_editor_absoluteY="467dp" />
+        android:translationZ="90dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/button6" />
 
     <TextView
         android:id="@+id/currentTV"
+        android:translationZ="90dp"
         android:layout_width="168dp"
-        android:layout_height="29dp"
+        android:layout_height="34dp"
+        android:layout_marginEnd="32dp"
         android:text="12 A"
         android:textAlignment="center"
         android:textSize="20sp"
-        tools:layout_editor_absoluteX="29dp"
-        tools:layout_editor_absoluteY="485dp" />
-
-    <Button
-        android:id="@+id/batteryButton"
-        android:layout_width="173dp"
-        android:layout_height="78dp"
-        android:background="@drawable/clear_button"
-        tools:layout_editor_absoluteX="27dp"
-        tools:layout_editor_absoluteY="357dp" />
-
-    <Button
-        android:id="@+id/batteryButton2"
-        android:layout_width="173dp"
-        android:layout_height="78dp"
-        android:background="@drawable/clear_button"
-        tools:layout_editor_absoluteX="218dp"
-        tools:layout_editor_absoluteY="356dp" />
+        app:layout_constraintBottom_toBottomOf="@+id/button6"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/button6"
+        app:layout_constraintVertical_bias="0.473" />
 
     <TextView
-        android:id="@+id/battery"
-        android:layout_width="164dp"
+        android:id="@+id/compassTV"
+        android:translationZ="90dp"
+        android:layout_width="155dp"
         android:layout_height="33dp"
-        android:text="Battery"
+        android:layout_marginEnd="48dp"
+        android:text="76"
         android:textAlignment="center"
-        android:textSize="26sp"
-        tools:layout_editor_absoluteX="31dp"
-        tools:layout_editor_absoluteY="357dp" />
-
-    <TextView
-        android:id="@+id/compass"
-        android:layout_width="157dp"
-        android:layout_height="32dp"
-        android:text="Compass"
-        android:textAlignment="center"
-        android:textSize="26sp"
-        tools:layout_editor_absoluteX="226dp"
-        tools:layout_editor_absoluteY="358dp" />
-
-    <Button
-        android:id="@+id/batteryButton4"
-        android:layout_width="173dp"
-        android:layout_height="78dp"
-        android:background="@drawable/clear_button"
-        tools:layout_editor_absoluteX="27dp"
-        tools:layout_editor_absoluteY="436dp" />
+        android:textSize="20sp"
+        app:layout_constraintBottom_toTopOf="@+id/button6"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/button2"
+        app:layout_constraintVertical_bias="0.558" />
 
     <TextView
         android:id="@+id/current"
-        android:layout_width="164dp"
-        android:layout_height="33dp"
+        android:layout_width="139dp"
+        android:layout_height="39dp"
+        android:fontFamily="@font/amiko_bold"
         android:text="Current"
         android:textAlignment="center"
-        android:textSize="26sp"
-        tools:layout_editor_absoluteX="31dp"
-        tools:layout_editor_absoluteY="444dp" />
+        android:textSize="20sp"
+        android:translationZ="90dp"
+        app:layout_constraintBaseline_toBaselineOf="@+id/currentTV"
+        app:layout_constraintEnd_toStartOf="@+id/currentTV"
+        app:layout_constraintHorizontal_bias="0.75"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <TextView
-        android:id="@+id/batteryTV"
-        android:layout_width="163dp"
-        android:layout_height="26dp"
-        android:text="50%"
+        android:id="@+id/compass"
+        android:layout_width="134dp"
+        android:layout_height="37dp"
+        android:fontFamily="@font/amiko_bold"
+        android:text="Compass"
         android:textAlignment="center"
         android:textSize="20sp"
-        tools:layout_editor_absoluteX="32dp"
-        tools:layout_editor_absoluteY="399dp" />
-
-    <TextView
-        android:id="@+id/statusTV"
-        android:layout_width="136dp"
-        android:layout_height="29dp"
-        android:text="OFF"
-        android:textSize="22sp"
-        tools:layout_editor_absoluteX="207dp"
-        tools:layout_editor_absoluteY="566dp" />
-
-    <Button
-        android:id="@+id/powerButton"
-        android:layout_width="177dp"
-        android:layout_height="41dp"
-        android:text="TURN ON"
-        tools:layout_editor_absoluteX="17dp"
-        tools:layout_editor_absoluteY="603dp" />
-
-    <Button
-        android:id="@+id/chargeButton"
-        android:layout_width="177dp"
-        android:layout_height="41dp"
-        android:text="CHARGE"
-        tools:layout_editor_absoluteX="218dp"
-        tools:layout_editor_absoluteY="603dp" />
+        android:translationZ="90dp"
+        app:layout_constraintBaseline_toBaselineOf="@+id/compassTV"
+        app:layout_constraintEnd_toStartOf="@+id/compassTV"
+        app:layout_constraintHorizontal_bias="0.724"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <TextView
         android:id="@+id/status"
-        android:layout_width="76dp"
-        android:layout_height="28dp"
-        android:text="Status: "
+        android:layout_width="77dp"
+        android:layout_height="32dp"
+        android:layout_marginTop="27dp"
+        android:layout_marginEnd="40dp"
+        android:layout_marginBottom="3dp"
+        android:fontFamily="@font/amiko_bold"
+        android:text="Status"
         android:textSize="18sp"
-        tools:layout_editor_absoluteX="116dp"
-        tools:layout_editor_absoluteY="572dp" />
+        android:translationZ="90dp"
+        app:layout_constraintBottom_toTopOf="@+id/statusTV"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toEndOf="@+id/imageView2"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="1.0" />
+
+    <TextView
+        android:id="@+id/statusTV"
+        android:layout_width="130dp"
+        android:layout_height="29dp"
+        android:layout_marginStart="93dp"
+        android:layout_marginEnd="50dp"
+        android:text="OFF"
+        android:textSize="22sp"
+        android:translationZ="90dp"
+        app:layout_constraintBaseline_toBaselineOf="@+id/batteryTV"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/batteryTV" />
+
+    <ImageView
+        android:id="@+id/imageView"
+        android:layout_width="317dp"
+        android:layout_height="260dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.214"
+        app:srcCompat="@mipmap/mower_image" />
+
+    <eo.view.batterymeter.BatteryMeterView
+        android:id="@+id/batteryMeter"
+        android:layout_width="82dp"
+        android:layout_height="46dp"
+        android:rotation="90"
+        app:batteryMeterChargingColor="#4caf50"
+        app:batteryMeterColor="#0277bd"
+        app:batteryMeterCriticalChargeLevel="15"
+        app:batteryMeterCriticalColor="#d84315"
+        app:batteryMeterIndicatorColor="@android:color/transparent"
+        app:batteryMeterTheme="rounded"
+        app:batteryMeterUnknownColor="#e0e0e0"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.003"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.08" />
+
+    <Button
+        android:id="@+id/button2"
+        android:layout_width="437dp"
+        android:layout_height="86dp"
+        android:background="@drawable/settings_button"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.595" />
+
+    <Button
+        android:id="@+id/button6"
+        android:layout_width="428dp"
+        android:layout_height="89dp"
+        android:layout_marginTop="76dp"
+        android:background="@drawable/settings_button"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/button2" />
+
+    <TextView
+        android:id="@+id/batteryTV"
+        android:layout_width="104dp"
+        android:layout_height="37dp"
+        android:text="--%"
+        android:textSize="20sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toEndOf="@+id/batteryMeter"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.092" />
+
+    <ImageView
+        android:id="@+id/imageView2"
+        android:layout_width="149dp"
+        android:layout_height="75dp"
+        app:layout_constraintBottom_toTopOf="@+id/imageView"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.061"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.153"
+        app:srcCompat="@drawable/elawn_logo" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

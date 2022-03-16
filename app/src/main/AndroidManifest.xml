@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.elawn_android" >
+    package="com.example.elawn_android">
     <!--
          The ACCESS_COARSE/FINE_LOCATION permissions are not required to use
          Google Maps Android API v2, but you must specify either coarse or fine
@@ -13,16 +13,16 @@
 
     <application
         android:allowBackup="true"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@mipmap/e_lawn_icon"
         android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_launcher_round"
+        android:roundIcon="@mipmap/e_lawn_icon"
         android:supportsRtl="true"
-        android:theme="@style/Theme.Design.Light.NoActionBar" >
+        android:theme="@style/Theme.Design.Light.NoActionBar">
         <activity
-            android:name=".MainActivity2"
+            android:name=".OnBoardingActivity"
             android:exported="false" />
         <activity
-            android:name=".SettingsActivity"
+            android:name=".MainActivity2"
             android:exported="false" />
         <activity
             android:name=".LoginActivity"
@@ -47,6 +47,9 @@
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyAXLareLtyuQAoKBo-z-ETZvq71qrRYpZ0" />
+        <meta-data
+            android:name="preloaded_fonts"
+            android:resource="@array/preloaded_fonts" />
 
         <activity
             android:name=".MapsActivity"
@@ -60,7 +63,7 @@
             android:exported="true" />
         <activity
             android:name=".LauncherActivity"
-            android:exported="true" >
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

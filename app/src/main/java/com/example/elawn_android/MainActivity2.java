@@ -52,7 +52,7 @@ public class  MainActivity2 extends AppCompatActivity {
                 case R.id.home:
                     replaceFragment(new HomeFragment());
                     break;
-                case R.id.profile:
+                case R.id.mower:
                     replaceFragment(new MowerFragment());
                     break;
                 case R.id.settings:

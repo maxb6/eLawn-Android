@@ -129,7 +129,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         powerButton = findViewById(R.id.powerButton);
         chargeButton = findViewById(R.id.chargeButton);
         compassTV = findViewById(R.id.compassTV);
-        batteryTV = findViewById(R.id.batteryTV);
         currentTV = findViewById(R.id.currentTV);
         tempTV = findViewById(R.id.tempTV);
         statusTV = findViewById(R.id.statusTV);
@@ -163,13 +162,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             @Override
             public void onClick(View v) {
                 goToMapsActivity();
-            }
-        });
-
-        settingsButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                goToSettingsActivity();
             }
         });
 
@@ -340,13 +332,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             //no one is logged in
             goToLoginActivity();
         }
-    }
-
-
-    private void goToSettingsActivity() {
-        Intent intent = new Intent (this,SettingsActivity.class);
-        startActivity(intent);
-        finish();
     }
 
     private void goToLoginActivity() {

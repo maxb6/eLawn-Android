@@ -16,7 +16,9 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.elawn_android.LoginActivity;
+import com.example.elawn_android.MainActivity2;
 import com.example.elawn_android.R;
+import com.example.elawn_android.Service.SharedPreferencesHelper;
 
 public class OnBoardingFragment2 extends Fragment {
 
@@ -26,6 +28,7 @@ public class OnBoardingFragment2 extends Fragment {
     private ImageView marker2;
     private ImageView marker3;
     private ImageView marker4;
+    private SharedPreferencesHelper spHelper;
 
 
     @Nullable
@@ -48,11 +51,22 @@ public class OnBoardingFragment2 extends Fragment {
         skipButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                goToLoginActivity();
+                if(spHelper.isUserLoggedIn()){
+                    goToMainActivity();
+                }
+                else{
+                    goToLoginActivity();
+                }
             }
         });
 
         return root;
+    }
+
+    private void goToMainActivity() {
+        Intent intent = new Intent (getActivity(), MainActivity2.class);
+        //intent.putExtra("frgToLoad", SETTINGS_FRAGMENT);
+        startActivity(intent);
     }
 
     protected void goToLoginActivity(){
