@@ -91,6 +91,26 @@ public class PathFinding {
 
     }
 
+    public double getArea(Coordinate v1, Coordinate v2, Coordinate v3, Coordinate v4){
+        double base1;
+        double height1;
+        double base2;
+        double height2;
+
+        base1 = getDistance(v1,v2);
+        height1 = getDistance(v2,v3);
+
+        base2 = getDistance(v3,v4);
+        height2 = getDistance(v4,v1);
+
+        double area1 = base1 * height1;
+        double area2 = base2 * height2;
+
+        double area = (area1 + area2) / 2;
+
+        return area;
+    }
+
 
 
     public ArrayList<Coordinate> pathAlgorithm() {
@@ -150,7 +170,7 @@ public class PathFinding {
                 path.add(bottomPath.get(j++));
                 path.add(bottomPath.get(j++));
             }
-            else if(j >= bottomPath.size())
+            else if(j >= bottomPath.size()-1)
             {
                 path.add(bottomPath.get(bottomPath.size()-1));
             }
