@@ -1,14 +1,19 @@
 package com.example.elawn_android.MainFragments;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
+import android.location.Location;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import android.util.Log;
@@ -21,6 +26,7 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.elawn_android.Database.DatabaseHelper;
 import com.example.elawn_android.LoginActivity;
@@ -31,6 +37,8 @@ import com.example.elawn_android.R;
 import com.example.elawn_android.Service.Coordinate;
 import com.example.elawn_android.Service.PathFinding;
 import com.example.elawn_android.Service.SharedPreferencesHelper;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
@@ -43,6 +51,7 @@ import com.google.android.gms.maps.model.Polygon;
 import com.google.android.gms.maps.model.PolygonOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
@@ -53,11 +62,14 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import eo.view.batterymeter.BatteryMeter;
 
 public class HomeFragment extends Fragment implements OnMapReadyCallback {
 
+    private static final int LOCATION_REQUEST_CODE = 99;
     private GoogleMap mMap;
     private MarkerOptions mowMarkerOptions = new MarkerOptions();
     private Marker mowMarker;
@@ -82,6 +94,10 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
     ArrayList<Coordinate> pathAlgo = new ArrayList<Coordinate>();
     private ImageButton settingsButton;
     private View view;
+    private Timer mowTimer = new Timer();
+
+    private ArrayList<String> coordList = new ArrayList<String>();
+    int coordCounter=0;
 
     private HashMap<String, Coordinate> vertexCoordinates = new HashMap<String, Coordinate>();
     //protected ArrayList<Coordinate> vertexCoordinates = new ArrayList<Coordinate>();
@@ -109,6 +125,8 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
     private DatabaseReference pathReference;
     private DatabaseReference ATMegaReference;
     private DatabaseReference modeReference;
+
+    private FusedLocationProviderClient fusedLocationProviderClient;
 
 
     private DatabaseHelper dbHelper;
@@ -155,8 +173,11 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
 
         dbHelper = new DatabaseHelper(getActivity());
 
+        //gpsReference.child("CMW").setValue("45.495782289355525@-73.82366750389338");
+
         //get battery info
         getBatteryLevel();
+        //placeMowerMarker();
 
         //spinner code --------------------------------------------------------------------------
         ArrayList<String> spinnerOptions = new ArrayList<>();
@@ -172,6 +193,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 currentPath = dbHelper.getPathIdFromName(mainSpinner.getSelectedItem().toString());
+                //mowTimer.cancel();
                 Log.i("current path", ""+currentPath);
                 //Log.i("Current Path","Current Path: "+ currentPath);
                 //set current path in firebase
@@ -186,13 +208,13 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
             }
         });
 
-        //manual and auto button, when mode=1 -> auto mode, when mode =2 -> manual mode
+        //manual and auto button, when mode = 0 -> manual ,when mode=1 -> auto mode, when mode =2 -> charging
 
        modeReference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 int mode = Integer.parseInt(snapshot.getValue().toString());
-                if (mode == 2){
+                if (mode == 0){
                     manualButton.setBackgroundResource(R.drawable.white_button_clicked);
                     autoButton.setBackgroundResource(R.drawable.white_button);
                     //manualMode();
@@ -204,7 +226,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
                 }
                 else {
                     modeReference.setValue(2);
-                    manualButton.setBackgroundResource(R.drawable.white_button_clicked);
+                    manualButton.setBackgroundResource(R.drawable.white_button);
                     autoButton.setBackgroundResource(R.drawable.white_button);
                     //manualMode();
                 }
@@ -217,7 +239,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
         manualButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                modeReference.setValue(2);
+                modeReference.setValue(0);
                 manualButton.setBackgroundResource(R.drawable.white_button_clicked);
                 autoButton.setBackgroundResource(R.drawable.white_button);
                 //manualMode();
@@ -281,6 +303,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
                             @Override
                             public void onClick(View v) {
                                 statusReference.setValue("Charging");
+                                modeReference.setValue(2);
                             }
                         });
                     }
@@ -291,7 +314,10 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
                         powerButton.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
+
                                 statusReference.setValue("Off");
+                                //mowTimer.cancel();
+                                mowTimer=null;
                             }
                         });
                         chargeButton.setText("CHARGE");
@@ -299,6 +325,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
                             @Override
                             public void onClick(View v) {
                                 statusReference.setValue("Charging");
+                                modeReference.setValue(2);
                             }
                         });
                     }
@@ -338,6 +365,22 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
 
 
         return root;
+    }
+
+    private void simulateMowerMovement() {
+
+        new Timer().scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+
+                if(coordCounter<coordList.size()) {
+                    gpsReference.child("CMW").setValue(coordList.get(coordCounter));
+                    coordCounter++;
+                }
+
+            }
+        }, 0, 500);//put here time 1000 milliseconds=1 second
+
     }
 
     private void manualMode() {
@@ -404,7 +447,6 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
                     chargingMarker = null;
 
                     setGPSPathCoordinates(currentPath);
-                    //mowerMarker();
                     //chargingMarker();
                     //Log.i(TAG, "Vertex Coordinates Array: Lat:" + vertexCoordinates.get(1).getLat()
                     //  + "     Lon:" + vertexCoordinates.get(1).getLon());
@@ -488,7 +530,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
                             //for each different path chosen, clear the firebase node, reset the coord count,
                             //write the new path coordinates to the firebase and move the camera to the current path
                             coordCount = 0;
-                            gpsReference.child("Path Coordinates").setValue("0");
+                            gpsReference.child("PC").setValue("0");
                             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(m1,19));
 
                             //iterate through the arraylist of coordinates and fill the map with the coordinates
@@ -509,7 +551,9 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
                                 mowPathArray.add(new LatLng(s.getLat(),s.getLon()));
                                 arrayLat.add(s.getLat());
                                 arrayLon.add(s.getLon());
-                                gpsReference.child("Path Coordinates").child(String.valueOf(coordCount)).setValue(s);
+                                coordList.add(s.getLat()+"@"+s.getLon());
+                                //gpsReference.child("Path Coordinates").child(String.valueOf(coordCount)).setValue(s);
+                                gpsReference.child("PC").child(String.valueOf(coordCount)).setValue(s.getLat()+"@"+s.getLon());
 
                             }
 
@@ -524,10 +568,11 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
 
                             //add the charge point to the end of the firebase coordinates
                             Coordinate vCharge = new Coordinate(mCharge.latitude,mCharge.longitude);
-                            gpsReference.child("Path Coordinates").child(String.valueOf(coordCount+1)).setValue(vCharge);
+                            gpsReference.child("PC").child(String.valueOf(coordCount+1)).setValue(vCharge.getLat()+"@"+vCharge.getLon());
+                            coordList.add(vCharge.getLat()+"@"+vCharge.getLon());
 
                             //set the value of the amount of path points in the firebase
-                            gpsReference.child("Number of Path Coordinates").setValue(mowPathArray.size());
+                            gpsReference.child("NOP").setValue(mowPathArray.size());
 
                             //insert the created polyline onto the map
                             Polyline polyline = mMap.addPolyline(mowPath);
@@ -536,6 +581,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
                         //vertexCoordinates.put(String.valueOf(childCount),coordinate);
                         vCoordinates.add(coordinate);
                         chargingMarker();
+                        placeMowerMarker();
                         childCount++;
                     }
 
@@ -600,38 +646,60 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
 
     }
 
-    private void mowerMarker(){
+    private void getUserLocation() {
+        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(getActivity());
 
-        gpsReference.child("CMW").addValueEventListener(new ValueEventListener() {
+        //check if user has permission set
+        if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            fusedLocationProviderClient.getLastLocation().addOnSuccessListener(getActivity(), new OnSuccessListener<Location>() {
+                @Override
+                public void onSuccess(Location location) {
+                    Coordinate userLocation = new Coordinate(location.getLatitude(), location.getLongitude());
+                    gpsReference.child("CUL").setValue(userLocation.getLat()+"@"+userLocation.getLon());
+                }
+            });
+        }
+
+        //request permissions if user hasn't allowed yet
+        else {
+            if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_REQUEST_CODE);
+            }
+        }
+    }
+
+    private void placeMowerMarker(){
+
+        gpsReference.child("CUL").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
 
                 //obtain coordinate from firebase as latlng value
-                Coordinate mowerCoordinate = snapshot.getValue(Coordinate.class);
+                //Coordinate mowerCoordinate = snapshot.getValue(Coordinate.class);
 
                 String [] mowerCoord = snapshot.getValue().toString().split("@");
-                double mowerLat = Double.parseDouble(mowerCoord[0].substring(7));
-                double mowerLon = Double.parseDouble(mowerCoord[1].substring(0,mowerCoord[1].length()-1));
-                Log.i("MOWER COORD",mowerLat+"-----"+mowerLon);
+                double mowerLat = Double.parseDouble(mowerCoord[0]);
+                double mowerLon = Double.parseDouble(mowerCoord[1]);
+                Log.i("MOWER COORD extracted",mowerLat+"-----"+mowerLon);
                 //mowerCoord[0].replace("{coord=","");
                 //mowerCoord[1].replace("}","");
-                Log.i("MOWER COORD",mowerCoord[0]+"-----"+mowerCoord[1]);
+                Log.i("MOWER COORD actual",mowerCoord[0]+"-----"+mowerCoord[1]);
                 //double mowerLat = Double.parseDouble(mowerCoord[0]);
 
 
                 mowerLocation = new LatLng(mowerLat, mowerLon);
 
                 //make mower icon marker smaller in size
-                BitmapDrawable bitmapDraw = (BitmapDrawable)getResources().getDrawable(R.drawable.mower_icon);
+                BitmapDrawable bitmapDraw = (BitmapDrawable) view.getResources().getDrawable(R.drawable.blue_circle);
                 Bitmap b = bitmapDraw.getBitmap();
                 Bitmap mowerIcon = Bitmap.createScaledBitmap(b, 100, 100, false);
                 mowMarkerOptions.icon(BitmapDescriptorFactory.fromBitmap(mowerIcon));
 
                 //if there is no marker, add the marker to the app
-                if (mowMarker == null){
-                    //mowMarkerOptions.position(mowerLocation);
+                if (mowMarker == null ){
+                    mowMarkerOptions.position(mowerLocation);
                     mowMarker = mMap.addMarker(mowMarkerOptions);
-                    //mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mowerLocation,17));
+                    //mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mowerLocation,19));
                 }
 
                 //once there is a marker
@@ -639,7 +707,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
                 //mowMarker.setRotation();
                 mowMarker.setPosition(mowerLocation);
                 //move camera on update
-                //mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mowerLocation,17));
+                //mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mowerLocation,19));
 
             }
 

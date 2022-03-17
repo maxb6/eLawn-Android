@@ -13,6 +13,8 @@ import android.annotation.SuppressLint;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
+import android.os.Handler;
+import android.util.Log;
 
 import com.example.elawn_android.MainFragments.HomeFragment;
 import com.example.elawn_android.MainFragments.MowerFragment;
@@ -24,6 +26,9 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+
+import java.util.Timer;
+import java.util.TimerTask;
 
 
 public class  MainActivity2 extends AppCompatActivity {
@@ -65,9 +70,29 @@ public class  MainActivity2 extends AppCompatActivity {
         Bundle args = new Bundle();
         HomeFragment homeFragment = new HomeFragment();
 
+        Handler handler = new Handler();
+        //Runnable runnable;
+        int delay = 1000;
+
+        handler.postDelayed(new Runnable() {
+            public void run() {
+                getUserLocation();          // this method will contain your almost-finished HTTP calls
+                Log.i("USER LOCATION", " UPDATED ");
+                handler.postDelayed(this, delay);
+            }
+        }, delay);
+
+        /*
+        new Timer().scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                getUserLocation();
+            }
+        }, 0, 1000);//put here time 1000 milliseconds=1 second
+        */
     }
 
-    //this funciton will replace the frame layout with the aprticular fragment selected from the menu
+    //this function will replace the frame layout with the aprticular fragment selected from the menu
     private void replaceFragment(Fragment fragment){
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
@@ -84,7 +109,8 @@ public class  MainActivity2 extends AppCompatActivity {
                 @Override
                 public void onSuccess(Location location) {
                     Coordinate userLocation = new Coordinate(location.getLatitude(), location.getLongitude());
-                    gpsReference.child("Current User Location").setValue(userLocation);
+                    Log.i("LOCATION ", "SUCCESS");
+                    gpsReference.child("CUL").setValue(userLocation.getLat()+"@"+userLocation.getLon());
                 }
             });
         }
@@ -93,6 +119,8 @@ public class  MainActivity2 extends AppCompatActivity {
         else {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                 ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_REQUEST_CODE);
+                Log.i("LOCATION ", "FAILED");
+
             }
         }
     }
