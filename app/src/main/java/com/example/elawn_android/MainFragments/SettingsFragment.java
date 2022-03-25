@@ -16,7 +16,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Switch;
 import android.widget.Toast;
@@ -30,11 +29,8 @@ import com.example.elawn_android.Service.Path;
 import com.example.elawn_android.Service.PathAdapter;
 import com.example.elawn_android.Service.SharedPreferencesHelper;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,7 +40,7 @@ public class SettingsFragment extends Fragment {
 
     private static final String TAG = "Settings fragment: ";
     private DatabaseReference mowControlReference;
-    private Switch controlSwitch;
+    private Switch powerSwitch;
     private Switch notificationSwitch;
     private RecyclerView mRecyclerView;
     private RecyclerView.LayoutManager mLayoutManager;
@@ -55,9 +51,11 @@ public class SettingsFragment extends Fragment {
     private SharedPreferencesHelper spHelper;
     private DatabaseHelper dbHelper;
     private static DatabaseReference pathReference;
+    private static DatabaseReference controlReference;
 
     private Button mapsButton;
     private ImageView questionMark;
+    private Button profileButton;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -69,19 +67,21 @@ public class SettingsFragment extends Fragment {
         dbHelper = new DatabaseHelper(getActivity());
 
         mapsButton = root.findViewById(R.id.mapsButton2);
+        profileButton = root.findViewById(R.id.profileButton);
         questionMark = root.findViewById(R.id.questionMark);
 
         pathReference = FirebaseDatabase.getInstance().getReference("Users")
                 .child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child("Mower Paths");
 
+        controlReference = FirebaseDatabase.getInstance().getReference("Control");
+
         //control switch initialization
-        controlSwitch = root.findViewById(R.id.controlSwitch);
+        powerSwitch = root.findViewById(R.id.controlSwitch);
         notificationSwitch = root.findViewById(R.id.notificationSwitch);
         mRecyclerView = root.findViewById(R.id.pathRecyclerView);
 
-        mowControlReference = FirebaseDatabase.getInstance().getReference().child("Control").child("MowControl");
 
-        setControlSwitchValue();
+        setPowerSwitchValue();
         setNotificationSwitchValue();
         loadPaths();
 
@@ -99,52 +99,50 @@ public class SettingsFragment extends Fragment {
             }
         });
 
-        Button button = root.findViewById(R.id.button);
-        button.setOnClickListener(new View.OnClickListener() {
+        Button instructionButton = root.findViewById(R.id.button);
+        instructionButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                goToOnBoardingActivity();
+                goToOnBoardingActivity2();
             }
         });
+
+        profileButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ProfileFragment profileFragment = new ProfileFragment();
+                getActivity().getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.frame_layout, profileFragment, "findThisFragment")
+                        .addToBackStack(null)
+                        .commit();
+            }
+        });
+
+
 
         // Inflate the layout for this fragment
         return root;
     }
 
-    protected void setControlSwitchValue(){
-        mowControlReference.addValueEventListener(new ValueEventListener() {
+    protected void setPowerSwitchValue(){
+        if(spHelper.getPower()==false){
+           powerSwitch.setChecked(false);
+        }else{
+            powerSwitch.setChecked(true);
+        }
+
+        powerSwitch.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                //read the current firebase value of device and convert it to int
-                String controlString = snapshot.getValue().toString();
-                int controlInt = Integer.parseInt(controlString);
-                Log.i("Settings","control switch: "+controlInt);
-                //set the switch to whatever the current firebase value is
-                if(controlInt==0){
-                    controlSwitch.setChecked(false);
-                }else{
-                    controlSwitch.setChecked(true);
+            public void onClick(View v) {
+                if(powerSwitch.isChecked()){
+                    spHelper.setPower(true);
                 }
-
-                //when user activates control switch, set firebase value to 1 which will allow sensor to send values
-                //otherwise it will be turned off and it wont send values
-
-                controlSwitch.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        if(controlSwitch.isChecked()){
-                            mowControlReference.setValue(1);
-                        }
-                        else{
-                            mowControlReference.setValue(0);
-                        }
-                    }
-                });
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                Toast.makeText(getActivity(), "Control Switch error!", Toast.LENGTH_LONG).show();
+                else{
+                    controlReference.child("Status").setValue("Off");
+                    controlReference.child("Blade").setValue(0);
+                    controlReference.child("MowControl").setValue(0);
+                    spHelper.setPower(false);
+                }
             }
         });
     }
@@ -229,7 +227,7 @@ public class SettingsFragment extends Fragment {
         startActivity(intent);
     }
 
-    private void goToOnBoardingActivity() {
+    private void goToOnBoardingActivity2() {
         Intent intent = new Intent (getActivity(), OnBoardingActivity.class);
         startActivity(intent);
     }

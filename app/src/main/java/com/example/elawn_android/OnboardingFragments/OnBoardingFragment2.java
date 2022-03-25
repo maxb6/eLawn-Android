@@ -15,8 +15,10 @@ import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.example.elawn_android.LauncherActivity;
 import com.example.elawn_android.LoginActivity;
 import com.example.elawn_android.MainActivity2;
+import com.example.elawn_android.MainFragments.SettingsFragment;
 import com.example.elawn_android.R;
 import com.example.elawn_android.Service.SharedPreferencesHelper;
 
@@ -51,12 +53,7 @@ public class OnBoardingFragment2 extends Fragment {
         skipButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(spHelper.isUserLoggedIn()){
-                    goToMainActivity();
-                }
-                else{
-                    goToLoginActivity();
-                }
+                goToLauncherActivity();
             }
         });
 
@@ -69,8 +66,8 @@ public class OnBoardingFragment2 extends Fragment {
         startActivity(intent);
     }
 
-    protected void goToLoginActivity(){
-        Intent intent = new Intent (getActivity(), LoginActivity.class);
+    protected void goToLauncherActivity(){
+        Intent intent = new Intent (getActivity(), LauncherActivity.class);
         startActivity(intent);
     }
 }

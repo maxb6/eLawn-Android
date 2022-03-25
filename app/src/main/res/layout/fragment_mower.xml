@@ -133,22 +133,21 @@
         android:translationZ="90dp"
         app:layout_constraintBottom_toTopOf="@+id/statusTV"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintHorizontal_bias="0.782"
         app:layout_constraintStart_toEndOf="@+id/imageView2"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="1.0" />
 
     <TextView
         android:id="@+id/statusTV"
-        android:layout_width="130dp"
-        android:layout_height="29dp"
-        android:layout_marginStart="93dp"
-        android:layout_marginEnd="50dp"
+        android:layout_width="105dp"
+        android:layout_height="33dp"
         android:text="OFF"
         android:textSize="22sp"
         android:translationZ="90dp"
         app:layout_constraintBaseline_toBaselineOf="@+id/batteryTV"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.675"
         app:layout_constraintStart_toEndOf="@+id/batteryTV" />
 
     <ImageView

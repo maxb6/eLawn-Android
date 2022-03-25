@@ -98,7 +98,7 @@ public class MowerFragment extends Fragment {
         //Read the ATMega nodes in the firebase and set the values
         //get current address
 
-        GPSReference.child("Current Mower Location").addValueEventListener(new ValueEventListener() {
+        GPSReference.child("CurrentMowerCoordinate").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 Coordinate mowerCoordinate = snapshot.getValue(Coordinate.class);
@@ -126,10 +126,15 @@ public class MowerFragment extends Fragment {
         ATMegaReference.child("BATTERY").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                batteryLevel = snapshot.getValue().toString();
-                batteryTV.setText(batteryLevel+"%");
+                String batteryLevel = snapshot.getValue().toString();
                 Log.i(TAG,snapshot.getValue().toString());
-                batteryMeter.setChargeLevel(Integer.parseInt(batteryLevel));
+                double batteryDouble = Double.parseDouble(batteryLevel);
+                int batteryInt = (int) (((batteryDouble - 22) * (100 - 0)) / (28 - 22));
+                if(batteryDouble<22){
+                    batteryInt = 0;
+                }
+                batteryMeter.setChargeLevel(batteryInt);
+                batteryTV.setText(batteryInt+"%");
             }
 
             @Override
@@ -141,7 +146,7 @@ public class MowerFragment extends Fragment {
         ATMegaReference.child("COMPASS").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                compassTV.setText(snapshot.getValue().toString());
+                compassTV.setText(snapshot.getValue().toString()+"°");
 
                 mowerRotation = Float.parseFloat(snapshot.getValue().toString());
                 //rotate mow marker on compass data change
@@ -157,7 +162,7 @@ public class MowerFragment extends Fragment {
         ATMegaReference.child("CURRENT").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                currentTV.setText(snapshot.getValue().toString());
+                currentTV.setText(snapshot.getValue().toString()+" A");
             }
 
             @Override
@@ -169,7 +174,7 @@ public class MowerFragment extends Fragment {
         ATMegaReference.child("TEMPERATURE").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                tempTV.setText(snapshot.getValue().toString());
+                tempTV.setText(snapshot.getValue().toString()+"°C");
             }
 
             @Override
@@ -200,17 +205,20 @@ public class MowerFragment extends Fragment {
 
                     if(currentStatus.equals("Off")){
                         statusTV.setTextColor(Color.RED);
+                        batteryMeter.setCharging(false);
 
 
                     }
 
                     else if(currentStatus.equals("Mowing")){
                         statusTV.setTextColor(Color.BLUE);
+                        batteryMeter.setCharging(false);
 
                     }
 
                     else if(currentStatus.equals("Charging")){
                         statusTV.setTextColor(Color.GREEN);
+                        batteryMeter.setCharging(true);
 
                     }
 

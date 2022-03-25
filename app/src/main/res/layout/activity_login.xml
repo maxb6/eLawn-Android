@@ -4,86 +4,125 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@drawable/background3"
     tools:context=".LoginActivity">
 
     <EditText
         android:id="@+id/emailEditText"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="100dp"
-        android:layout_marginTop="211dp"
-        android:layout_marginEnd="101dp"
-        android:layout_marginBottom="31dp"
-        android:ems="10"
+        android:layout_marginTop="20dp"
+        android:layout_marginBottom="432dp"
+        android:background="@drawable/edit_text_bg"
         android:hint="Email"
-        android:inputType="textPersonName"
-        app:layout_constraintBottom_toTopOf="@+id/passwordEditText"
+        android:paddingLeft="20dp"
+        android:paddingTop="10dp"
+        android:paddingBottom="10dp"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <EditText
-        android:id="@+id/passwordEditText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="100dp"
-        android:layout_marginEnd="101dp"
-        android:layout_marginBottom="24dp"
-        android:ems="10"
-        android:hint="Password"
-        android:inputType="textPersonName|textPassword"
-        app:layout_constraintBottom_toTopOf="@+id/forgotPasswordTextView"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintTop_toBottomOf="@+id/nameSignUpEditText"
+        app:layout_constraintVertical_bias="0"
+        app:layout_constraintWidth_percent=".8" />
 
     <TextView
         android:id="@+id/forgotPasswordTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="193dp"
-        android:layout_marginEnd="101dp"
         android:layout_marginBottom="60dp"
         android:clickable="true"
         android:text="Forgot Password ?"
+        android:textColor="#000000"
+        android:textSize="15sp"
         app:layout_constraintBottom_toTopOf="@+id/loginButton"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="1.0"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintHorizontal_bias="0.819"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/passwordEditText"
+        app:layout_constraintVertical_bias="1.0" />
 
-    <Button
-        android:id="@+id/loginButton"
-        android:layout_width="114dp"
-        android:layout_height="47dp"
-        android:layout_marginStart="159dp"
-        android:layout_marginEnd="138dp"
-        android:layout_marginBottom="31dp"
-        android:text="Login"
-        app:layout_constraintBottom_toTopOf="@+id/registerButton"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
-
-    <Button
-        android:id="@+id/registerButton"
-        android:layout_width="119dp"
-        android:layout_height="54dp"
-        android:layout_marginStart="155dp"
-        android:layout_marginEnd="137dp"
-        android:layout_marginBottom="173dp"
-        android:text="Register"
+    <EditText
+        android:id="@+id/passwordEditText"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:layout_marginBottom="368dp"
+        android:background="@drawable/edit_text_bg"
+        android:hint="Password"
+        android:paddingLeft="20dp"
+        android:paddingTop="10dp"
+        android:paddingBottom="10dp"
+        android:password="true"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/nameSignUpEditText"
+        app:layout_constraintVertical_bias="0"
+        app:layout_constraintWidth_percent=".8" />
 
     <ProgressBar
         android:id="@+id/loginProgressBar"
         style="?android:attr/progressBarStyle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="187dp"
-        android:layout_marginEnd="176dp"
-        android:layout_marginBottom="304dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintHorizontal_bias="0.498"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.582" />
+
+    <Button
+        android:id="@+id/loginButton"
+        android:layout_width="178dp"
+        android:layout_height="47dp"
+        android:layout_marginBottom="20dp"
+        android:background="@drawable/clear_button_white"
+        android:text="Login"
+        app:layout_constraintBottom_toTopOf="@+id/registerButton"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.497"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="1.0" />
+
+    <Button
+        android:id="@+id/registerButton"
+        android:layout_width="173dp"
+        android:layout_height="50dp"
+        android:layout_marginStart="146dp"
+        android:layout_marginEnd="146dp"
+        android:layout_marginBottom="156dp"
+        android:background="@drawable/clear_button_white"
+        android:text="Register"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
+
+    <ImageView
+        android:id="@+id/imageView3"
+        android:layout_width="308dp"
+        android:layout_height="74dp"
+        android:layout_marginStart="38dp"
+        android:layout_marginTop="72dp"
+        android:layout_marginEnd="41dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.541"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/elawn_logo" />
+
+    <TextView
+        android:id="@+id/textView8"
+        android:layout_width="409dp"
+        android:layout_height="30dp"
+        android:layout_marginTop="1dp"
+        android:layout_marginBottom="32dp"
+        android:gravity="center"
+        android:text="Smart Electric Lawn Mower"
+        app:layout_constraintBottom_toTopOf="@+id/emailEditText"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/imageView3"
+        app:layout_constraintVertical_bias="0.0" />
 </androidx.constraintlayout.widget.ConstraintLayout>

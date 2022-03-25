@@ -15,6 +15,7 @@ import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
 
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -30,13 +31,15 @@ import android.widget.Toast;
 
 import com.example.elawn_android.Database.DatabaseHelper;
 import com.example.elawn_android.LoginActivity;
+import com.example.elawn_android.MainActivity2;
 import com.example.elawn_android.ManualActivity;
 import com.example.elawn_android.MapsActivity;
-import com.example.elawn_android.ModeActivity;
+import com.example.elawn_android.MyService;
 import com.example.elawn_android.R;
 import com.example.elawn_android.Service.Coordinate;
 import com.example.elawn_android.Service.PathFinding;
 import com.example.elawn_android.Service.SharedPreferencesHelper;
+import com.example.elawn_android.Service.User;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -110,6 +113,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
     private LatLng m3;
     private LatLng m4;
     private LatLng mCharge;
+    private Timer timerMovement = new Timer();
 
     private Coordinate v1 = new Coordinate();
     private Coordinate v2 = new Coordinate();
@@ -125,6 +129,8 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
     private DatabaseReference pathReference;
     private DatabaseReference ATMegaReference;
     private DatabaseReference modeReference;
+    private DatabaseReference bladeReference;
+    private DatabaseReference chargeReference;
 
     private FusedLocationProviderClient fusedLocationProviderClient;
 
@@ -138,7 +144,6 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
         ViewGroup root = (ViewGroup)inflater.inflate(R.layout.fragment_home, container, false);
 
         view =  inflater.inflate(R.layout.fragment_home, container, false);
-
 
         spHelper = new SharedPreferencesHelper(getActivity());
 
@@ -161,11 +166,13 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
         userReference.child("Current Path").setValue(0);
 
         gpsReference = FirebaseDatabase.getInstance().getReference("GPS");
+        bladeReference = FirebaseDatabase.getInstance().getReference("Control").child("Blade");
 
         pathReference = FirebaseDatabase.getInstance().getReference("Users")
                 .child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child("Mower Paths");
 
         modeReference = FirebaseDatabase.getInstance().getReference("Control").child("Mode");
+        chargeReference = FirebaseDatabase.getInstance().getReference("Control").child("Charging");
 
         ATMegaReference = FirebaseDatabase.getInstance().getReference("ATMega");
 
@@ -208,7 +215,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
             }
         });
 
-        //manual and auto button, when mode = 0 -> manual ,when mode=1 -> auto mode, when mode =2 -> charging
+        //manual and auto button, when mode = 0 -> manual ,when mode=1 -> auto mode
 
        modeReference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -219,16 +226,10 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
                     autoButton.setBackgroundResource(R.drawable.white_button);
                     //manualMode();
                 }
-                else if (mode == 1){
+                if (mode == 1){
                     manualButton.setBackgroundResource(R.drawable.white_button);
                     autoButton.setBackgroundResource(R.drawable.white_button_clicked);
                     //autoMode();
-                }
-                else {
-                    modeReference.setValue(2);
-                    manualButton.setBackgroundResource(R.drawable.white_button);
-                    autoButton.setBackgroundResource(R.drawable.white_button);
-                    //manualMode();
                 }
             }
 
@@ -269,6 +270,12 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
         mMapView.onResume();
         mMapView.getMapAsync(this);
 
+
+        //check if user has allowed location permission
+        if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_REQUEST_CODE);
+        }
+
         //Change status text view and power button dependent on mode
         // Modes: Off, Charging and Mowing
         // status text view: read firebase status and display in the textview
@@ -293,8 +300,17 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
                         powerButton.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
-                                //simulateMowerMovement();
-                                statusReference.setValue("Mowing");
+                                if(spHelper.getPower() && currentPath != 0){
+                                    //simulateMowerMovement();
+                                    statusReference.setValue("Mowing");
+                                    bladeReference.setValue(1);
+                                }
+                                if (spHelper.getPower() == false){
+                                    Toast.makeText(getActivity(),"Power is off, please turn power on",Toast.LENGTH_SHORT).show();
+                                }
+                                if (currentPath == 0){
+                                    Toast.makeText(getActivity(),"No path exists, please create a path",Toast.LENGTH_SHORT).show();
+                                }
                             }
                         });
 
@@ -303,7 +319,9 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
                             @Override
                             public void onClick(View v) {
                                 statusReference.setValue("Charging");
-                                modeReference.setValue(2);
+                                bladeReference.setValue(0);
+                                chargeReference.setValue(1);
+                                batteryMeter2.setCharging(true);
                             }
                         });
                     }
@@ -316,7 +334,8 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
                             public void onClick(View v) {
 
                                 statusReference.setValue("Off");
-                                //mowTimer.cancel();
+                                bladeReference.setValue(0);
+                                //timerMovement.cancel();
                                 mowTimer=null;
                             }
                         });
@@ -326,6 +345,9 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
                             public void onClick(View v) {
                                 statusReference.setValue("Charging");
                                 modeReference.setValue(2);
+                                bladeReference.setValue(0);
+                                chargeReference.setValue(1);
+                                batteryMeter2.setCharging(true);
                             }
                         });
                     }
@@ -333,10 +355,14 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
                     else if(currentStatus.equals("Charging")){
                         powerButton.setText("TURN ON");
                         statusTV.setTextColor(Color.GREEN);
+                        batteryMeter2.setCharging(true);
                         powerButton.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
                                 statusReference.setValue("Mowing");
+                                bladeReference.setValue(1);
+                                chargeReference.setValue(0);
+                                batteryMeter2.setCharging(false);
                             }
                         });
 
@@ -344,7 +370,10 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
                         chargeButton.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
+
                                 statusReference.setValue("Off");
+                                chargeReference.setValue(0);
+                                batteryMeter2.setCharging(false);
                             }
                         });
                     }
@@ -363,13 +392,18 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
 
         countMowerPaths();
 
+        if(currentPath == 0){
+            placeCameraOnUserLocation();
+        }
 
         return root;
     }
 
     private void simulateMowerMovement() {
 
-        new Timer().scheduleAtFixedRate(new TimerTask() {
+        //Timer timerMovement = new Timer();
+
+        timerMovement.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
 
@@ -379,7 +413,8 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
                 }
 
             }
-        }, 0, 500);//put here time 1000 milliseconds=1 second
+        }, 0, 1500);//put here time 1000 milliseconds=1 second
+
 
     }
 
@@ -417,11 +452,6 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
 
     private void goToMapsActivity(){
         Intent intent = new Intent (getActivity(), MapsActivity.class);
-        startActivity(intent);
-    }
-
-    private void goToModeActivity(){
-        Intent intent = new Intent (getActivity(), ModeActivity.class);
         startActivity(intent);
     }
 
@@ -614,9 +644,14 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 String batteryLevel = snapshot.getValue().toString();
-                batteryTV2.setText(batteryLevel+"%");
                 Log.i(TAG,snapshot.getValue().toString());
-                batteryMeter2.setChargeLevel(Integer.parseInt(batteryLevel));
+                double batteryDouble = Double.parseDouble(batteryLevel);
+                int batteryInt = (int) (((batteryDouble - 22) * (100 - 0)) / (28 - 22));
+                if(batteryDouble<22){
+                    batteryInt = 0;
+                }
+                batteryMeter2.setChargeLevel(batteryInt);
+                batteryTV2.setText(batteryInt+"%");
             }
 
             @Override
@@ -646,7 +681,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
 
     }
 
-    private void getUserLocation() {
+    private void placeCameraOnUserLocation() {
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(getActivity());
 
         //check if user has permission set
@@ -655,7 +690,9 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
                 @Override
                 public void onSuccess(Location location) {
                     Coordinate userLocation = new Coordinate(location.getLatitude(), location.getLongitude());
-                    gpsReference.child("CUL").setValue(userLocation.getLat()+"@"+userLocation.getLon());
+                    //gpsReference.child("CurrentMowerCoordinate").setValue(userLocation);
+                    //gpsReference.child("CUL").setValue(userLocation.getLat()+"@"+userLocation.getLon());
+                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(userLocation.getLat(), userLocation.getLon()),19));
                 }
             });
         }
@@ -761,6 +798,19 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
 
             }
         });
+    }
+
+    protected void startService(){
+        Intent serviceIntent = new Intent(getActivity(), MyService.class);
+        ContextCompat.startForegroundService(getActivity(),serviceIntent);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if(currentPath == 0) {
+            placeCameraOnUserLocation();
+        }
     }
 
     @Override
