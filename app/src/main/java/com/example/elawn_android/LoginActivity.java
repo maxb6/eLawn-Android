@@ -2,7 +2,9 @@ package com.example.elawn_android;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 
+import android.Manifest;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Patterns;
@@ -46,8 +48,6 @@ public class LoginActivity extends AppCompatActivity {
 
         spHelper = new SharedPreferencesHelper(getApplicationContext());
         mAuth = FirebaseAuth.getInstance();
-
-
 
         loginProgressBar.setVisibility(View.GONE);
 

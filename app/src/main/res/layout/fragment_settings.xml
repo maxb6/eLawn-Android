@@ -152,6 +152,7 @@
         android:layout_height="56dp"
         android:fontFamily="@font/amiko_bold"
         android:text="View Instructions"
+        android:background="@drawable/grey_button"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.079"
@@ -160,11 +161,12 @@
         app:layout_constraintVertical_bias="0.944" />
 
     <Button
-        android:id="@+id/button4"
+        android:id="@+id/profileButton"
         android:layout_width="152dp"
         android:layout_height="57dp"
         android:fontFamily="@font/amiko_bold"
         android:text="Profile Settings"
+        android:background="@drawable/grey_button"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.916"

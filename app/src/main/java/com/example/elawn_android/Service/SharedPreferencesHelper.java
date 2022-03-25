@@ -88,6 +88,16 @@ public class SharedPreferencesHelper {
         return sharedPreferences.getBoolean("notif_control",true);
     }
 
+    public void setPower(Boolean control){
+        SharedPreferences.Editor edt = sharedPreferences.edit();
+        edt.putBoolean("power_control", control);
+        edt.commit();
+    }
+
+    public Boolean getPower(){
+        return sharedPreferences.getBoolean("power_control",true);
+    }
+
 
 
 }

@@ -249,6 +249,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     .position(marker.getPosition())
                     .title("Point " + String.valueOf(markerCount)));
             marker.showInfoWindow();
+            if (v1.getLat() == v2.getLat() && v1.getLon() == v2.getLon()){
+                onBackPressed();
+                Toast.makeText(this,"Points cannot be the same, please try again",Toast.LENGTH_SHORT).show();
+            }
         }
 
         if (markerCount == 3) {
@@ -259,6 +263,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     .position(marker.getPosition())
                     .title("Point " + String.valueOf(markerCount)));
             marker.showInfoWindow();
+            if ((v1.getLat() == v3.getLat() && v1.getLon() == v3.getLon()) || (v2.getLat() == v3.getLat() && v2.getLon() == v3.getLon())){
+                onBackPressed();
+                Toast.makeText(this,"Points cannot be the same, please try again",Toast.LENGTH_SHORT).show();
+            }
         }
 
         if (markerCount == 4) {
@@ -269,8 +277,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     .position(marker.getPosition())
                     .title("Point " + String.valueOf(markerCount)));
 
-            //write the selected coordinates to the firebase
-            Toast.makeText(this, "Mowing area successfully placed ", Toast.LENGTH_LONG).show();
+            if ((v1.getLat() == v4.getLat() && v1.getLon() == v4.getLon()) || (v2.getLat() == v4.getLat() && v2.getLon() == v4.getLon())||
+                   (v3.getLat() == v4.getLat() && v3.getLon() == v4.getLon())){
+                onBackPressed();
+                Toast.makeText(this,"Points cannot be the same, please try again",Toast.LENGTH_SHORT).show();
+            }
+
             //if the path number exists, get previous path number, add 1 otherwise set the path number to 1
             if (spHelper.getPathNumber() != null) {
                 //add one to the current path number
@@ -290,7 +302,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
              */
 
-
             PolygonOptions mowArea = new PolygonOptions()
                     .add(m1)
                     .add(m2)
@@ -304,6 +315,22 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             //use path finding algorithm to find coordinates for all polyline paths
 
             PathFinding p = new PathFinding(v1, v2, v3, v4);
+
+            double area = p.getArea(v1,v2,v3,v4);
+
+            if (area>3000 ){
+                onBackPressed();
+                Toast.makeText(this,"Mow area too big, please try again",Toast.LENGTH_SHORT).show();
+            }
+            if(area<10){
+                onBackPressed();
+                Toast.makeText(this,"Mow area too small, please try again",Toast.LENGTH_SHORT).show();
+            }
+
+            if(v1 == v2|| v2 == v3 || v3 == v4 || v1 == v3 || v1 ==v4 || v2 ==v4){
+                onBackPressed();
+                Toast.makeText(this,"Points cannot be the same, please try again",Toast.LENGTH_SHORT).show();
+            }
 
             ArrayList<Coordinate> algo = new ArrayList<Coordinate>();
             algo = p.pathAlgorithm();
@@ -330,7 +357,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
 
         if (markerCount == 5) {
-            Toast.makeText(this, "Charging point successfully placed ", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "Mow path successfully placed ", Toast.LENGTH_LONG).show();
             Marker chargeMarker = mMap.addMarker(chargingMarkerOptionsStatic
                     .position(marker.getPosition())
                     .title("Charging Point"));
@@ -403,6 +430,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int whichButton) {
                 // Canceled.
+                onBackPressed();
             }
         });
 
