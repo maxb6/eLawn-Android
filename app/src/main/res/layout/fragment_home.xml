@@ -30,6 +30,7 @@
         android:id="@+id/batteryTV2"
         android:layout_width="104dp"
         android:layout_height="37dp"
+        android:layout_marginTop="6dp"
         android:layout_marginEnd="176dp"
         android:text="--%"
         android:textSize="20sp"
@@ -38,7 +39,7 @@
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toEndOf="@+id/batteryMeter"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.089" />
+        app:layout_constraintVertical_bias="0.085" />
 
     <ImageView
         android:id="@+id/imageView4"
